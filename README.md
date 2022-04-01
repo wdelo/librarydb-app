@@ -1,6 +1,16 @@
 # librarydb-app
 
-## Setup
+## Setup: using only Eclipse
+- With Eclipse open, go to File -> Import
+- Select "Git" -> "Project from Git (with smart import)"
+- Select Clone URI
+- Paste `https://github.com/wdelo/librarydb-app` into "URI:" and select "Next >"
+- If all branches are not selected press "Select All", then select "Next >"
+- Place the location of the project where you want (I recommend just inside the Eclipse workspace), then select "Next >"
+- Make sure "Import source:" is the same location as the location in the previous step
+- Make sure "Detect and configure project natures" is checked and press Finished
+
+## Setup: using command line alongside Eclipse
 
 ### Cloning the project
 - On the command line, go to the directory where you want the root directory of the repository to reside (I recommend going to your Eclipse workspace)
