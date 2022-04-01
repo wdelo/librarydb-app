@@ -1,0 +1,7 @@
+# ignore binaries folder
+bin
+
+# ignore user specific files
+.settings
+.classpath
+.project
