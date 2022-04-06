@@ -406,6 +406,7 @@ public class InsertionManager implements UserOption {
 	}
 	
 	// Text-based UI for inserting into the database
+	@Override
 	public void execute(Connection conn, Scanner s) {
 		System.out.println("What kind of record would you like to insert?");
         System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");

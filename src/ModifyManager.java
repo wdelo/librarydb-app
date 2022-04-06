@@ -361,55 +361,56 @@ public class ModifyManager implements UserOption {
 	}
 	
 	// Text-based UI for inserting into the database
-		public void execute(Connection conn, Scanner s) {
-			System.out.println("What kind of record would you like to modify?");
-			System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");
-	        System.out.println("5. Actor\n6. Artist\n7. Author\n");
-	        System.out.println("8. Patron\n9. Review\n10. Checkout\n");
-	        System.out.println("11. Condition\n");
-	        System.out.println("12. Go back");
-	        int userChoice = DBUtils.getValidInput(1, 12, s);
+	@Override
+	public void execute(Connection conn, Scanner s) {
+		System.out.println("What kind of record would you like to modify?");
+		System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");
+        System.out.println("5. Actor\n6. Artist\n7. Author\n");
+        System.out.println("8. Patron\n9. Review\n10. Checkout\n");
+        System.out.println("11. Condition\n");
+        System.out.println("12. Go back");
+        int userChoice = DBUtils.getValidInput(1, 12, s);
+		
+		switch (userChoice) {
+		case 1:
+			modifyMovie(conn, s);
+			break;
+		case 2:
+			modifyAlbum(conn, s);
+			break;
+		case 3:
+			modifyTrack(conn, s);
+			break;
+		case 4:
+			modifyBook(conn, s);
+			break;
+		case 5:
+			modifyActor(conn, s);
+			break;
+		case 6:
+		    modifyArtist(conn, s);
+			break;
+		case 7:
+			modifyAuthor(conn, s);
+			break;
+		case 8:
+			modifyPatron(conn, s);
+			break;
+		case 9:
+			modifyReview(conn, s);
+			break;
+		case 10:
+			modifyCheckout(conn, s);
+			break;
+		case 11:
+			modifyCondition(conn, s);
+			break;
+		case 12:
 			
-			switch (userChoice) {
-			case 1:
-				modifyMovie(conn, s);
-				break;
-			case 2:
-				modifyAlbum(conn, s);
-				break;
-			case 3:
-				modifyTrack(conn, s);
-				break;
-			case 4:
-				modifyBook(conn, s);
-				break;
-			case 5:
-				modifyActor(conn, s);
-				break;
-			case 6:
-			    modifyArtist(conn, s);
-				break;
-			case 7:
-				modifyAuthor(conn, s);
-				break;
-			case 8:
-				modifyPatron(conn, s);
-				break;
-			case 9:
-				modifyReview(conn, s);
-				break;
-			case 10:
-				modifyCheckout(conn, s);
-				break;
-			case 11:
-				modifyCondition(conn, s);
-				break;
-			case 12:
-				
-			default:
-				break;
-			}
+		default:
+			break;
 		}
+	}
 
 	
 }

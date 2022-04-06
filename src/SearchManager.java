@@ -687,6 +687,7 @@ public class SearchManager implements UserOption {
 	}
 	
 	// Text-based UI for searching within the database
+	@Override
 	public void execute(Connection conn, Scanner s) {
 		System.out.println("What kind of record would you like to search for?");
         System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");

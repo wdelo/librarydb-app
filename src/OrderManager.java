@@ -15,6 +15,7 @@ public class OrderManager implements UserOption {
 	public OrderManager() {}
 
 	//Gives user option to choose to create or receive an order
+	@Override
 	public void execute(Connection conn, Scanner s) {
     	System.out.print("Would you like to ORDER or RECEIVE items?");
     	char choice = Character.toLowerCase(s.nextLine().charAt(0));
