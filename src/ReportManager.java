@@ -13,8 +13,11 @@ import java.sql.Date;
 import java.util.*;
 
 
-public class PopularQueries {
+public class ReportManager implements UserOption {
     
+	// Constructor
+	public ReportManager() {}
+	
 	/**
 	 *  The database file name.
 	 *  
@@ -210,7 +213,7 @@ public class PopularQueries {
         }
     }
     
-    public static void menu(Connection conn, Scanner s) {
+    public void execute(Connection conn, Scanner s) {
     	System.out.println("*********************************************************************");
     	System.out.println("Select A Popular Report");
     	System.out.println("1. Show Checkouts");
