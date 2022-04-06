@@ -9,10 +9,10 @@ import java.util.Scanner;
 
 //Utility class - handles searching within the database
 //Methods are organized in alphabetical order
-public class SearchManager {
+public class SearchManager implements UserOption {
 	
-	// Class cannot be instantiated
-	private SearchManager () {}
+	// Constructor
+	public SearchManager () {}
 	
 	// Retrieves a specific actor ID through a user search
 	public static String retrieveActor(Connection conn, Scanner s) {
@@ -687,7 +687,7 @@ public class SearchManager {
 	}
 	
 	// Text-based UI for searching within the database
-	public static void userSearch(Connection conn, Scanner s) {
+	public void execute(Connection conn, Scanner s) {
 		System.out.println("What kind of record would you like to search for?");
         System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");
         System.out.println("5. Actor\n6. Artist\n7. Author\n");

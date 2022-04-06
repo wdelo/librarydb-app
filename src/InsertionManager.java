@@ -6,10 +6,10 @@ import java.util.Scanner;
 
 //Utility class - handles searching within the database
 //Methods are organized in alphabetical order
-public class InsertionManager {
+public class InsertionManager implements UserOption {
 	
-	// Class cannot be instantiated
-	private InsertionManager () {}
+	// Constructor
+	public InsertionManager () {}
 		
 	// Performs an insertion for an actor and returns the new unique ID generated for it
 	private static String insertActor(Connection conn, Scanner s) {
@@ -406,7 +406,7 @@ public class InsertionManager {
 	}
 	
 	// Text-based UI for inserting into the database
-	public static void userInsert(Connection conn, Scanner s) {
+	public void execute(Connection conn, Scanner s) {
 		System.out.println("What kind of record would you like to insert?");
         System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");
         System.out.println("5. Actor\n6. Artist\n7. Author\n");

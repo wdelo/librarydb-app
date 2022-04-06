@@ -6,10 +6,10 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 // Utility class - handles modifying (editing and deleting) within the database
-public class ModifyManager {
+public class ModifyManager implements UserOption {
 
-	// Class cannot be instantiated
-	private ModifyManager() {}
+	// Constructor
+	public ModifyManager() {}
 	
 	private static void modifyActor(Connection conn, Scanner s) {
 		String id = SearchManager.retrieveActor(conn, s);
@@ -361,7 +361,7 @@ public class ModifyManager {
 	}
 	
 	// Text-based UI for inserting into the database
-		public static void userModify(Connection conn, Scanner s) {
+		public void execute(Connection conn, Scanner s) {
 			System.out.println("What kind of record would you like to modify?");
 			System.out.println("1. Movie\n2. Album\n3. Track\n4. Audiobook\n");
 	        System.out.println("5. Actor\n6. Artist\n7. Author\n");
