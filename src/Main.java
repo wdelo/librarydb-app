@@ -1,10 +1,10 @@
-
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -12,10 +12,25 @@ public class Main {
 	// Name of the DB file
 	private static String DATABASE = "Media_DB4.db";
 	
+	private static Map<Integer, UserOption> initializeOptionMap() {
+		Map<Integer, UserOption> optionMap = new HashMap<>();
+		optionMap.put(1, new InsertionManager());
+		optionMap.put(2, new ModifyManager());
+		optionMap.put(3, new SearchManager());
+		optionMap.put(4, new OrderManager());
+		optionMap.put(5, new ReportManager());
+		optionMap.put(6, null);
+		
+		return optionMap;
+	}
+	
 	public static void main (String[] args) 
 	{
         Connection conn = initializeDB(DATABASE);
-        Scanner s = new Scanner(System.in);
+        Scanner s = new Scanner(System.in);   
+        Map<Integer, UserOption> optionMap = initializeOptionMap();
+        
+        
         int userChoice = 0;
         
         do {
@@ -28,28 +43,14 @@ public class Main {
 			System.out.println("6. Exit program");
 			userChoice = DBUtils.getValidInput(1, 6, s);
 			
-			switch (userChoice) {
-			case 1:
-				InsertionManager.userInsert(conn, s);
-				break;
-			case 2:
-				ModifyManager.userModify(conn, s);
-				break;
-			case 3:
-				SearchManager.userSearch(conn, s);
-				break;
-			case 4:
-				OrderManager.createOrReceiveOrder(conn, s);
-				break;
-			case 5:
-				PopularQueries.menu(conn, s);
-				break;
-			case 6:
+			UserOption option = optionMap.get(userChoice);
+			
+			if (option != null) {
+				option.execute(conn, s);
+			} else {
 				System.out.println("Exiting program...");
-				break;
-			default:
-				break;
 			}
+			
         } while (userChoice != 6);
         
         try {
@@ -85,6 +86,8 @@ public class Main {
         
         return conn;
     }
+	
+	
 }
 
 
