@@ -24,14 +24,14 @@ public interface DBItemController {
 	 * We may want to create DBItemManager superclasses (e.g. Contributor, Media, Audio)
 	 */
 	
-	public void insert(Connection conn, Scanner in);
+	public String[] insert(Connection conn, Scanner in);
 	
-	public void edit(Connection conn, String id);
+	public void edit(Connection conn, Scanner in, String[] ids);
 	
-	public void delete(Connection conn, String id);
+	public void delete(Connection conn, Scanner in, String[] ids);
 	
 	public void search(Connection conn, Scanner in);	
 	
-	public void retrieve(Connection conn, Scanner in);
+	public String[] retrieve(Connection conn, Scanner in);
 	
 }
