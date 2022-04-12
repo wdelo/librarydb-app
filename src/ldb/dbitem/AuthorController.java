@@ -5,41 +5,42 @@ import java.util.Scanner;
 
 import ldb.util.DBUtils;
 
-public class ActorController implements DBItemController {
-	
+public class AuthorController implements DBItemController {
+
 	@Override
 	public String[] insert(Connection conn, Scanner in) {
-		System.out.println("Please enter the name of the actor:");
+		System.out.println("Please enter the name of the author:");
 		String name = in.nextLine();
 		System.out.println("Let's get a date of birth.");
 		String dob = DBUtils.getFormattedDate(in);
 		String id = DBUtils.getUniqueID(conn, "Contributor", "ContributorID", 9);
 		
-		DBUtils.insertRecord(conn, "Contributor", "'"+id+"'", "'"+name+"'", dob, "'Actor'");
-		return new String[]{ id };
+		DBUtils.insertRecord(conn, "Contributor", "'"+id+"'", "'"+name+"'", dob, "'Author'");
+		return new String[] {id};
 	}
 
 	@Override
 	public void edit(Connection conn, Scanner in, String[] ids) {
-		System.out.println("Please enter the name of the actor:");
+		System.out.println("Please enter the name of the author:");
 		String name = in.nextLine();
 		System.out.println("Let's get a date of birth.");
 		String dob = DBUtils.getFormattedDate(in);
 		
-		DBUtils.editRecord(conn, "Contributor", "'"+ids[0]+"'", "'"+name+"'", dob, "'Actor'");
+		DBUtils.editRecord(conn, "Contributor", "'"+ids[0]+"'", "'"+name+"'", dob, "'Author'");
 	}
 
 	@Override
 	public void delete(Connection conn, Scanner in, String[] ids) {
 		DBUtils.deleteRecord(conn, "DELETE FROM Contributor WHERE ContributorID="+ids[0]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE ContributorID="+ids[0]);
 	}
 
 	@Override
 	public void search(Connection conn, Scanner in) {
-		System.out.println("Please enter the name of the actor to search for:");
+		System.out.println("Please enter the name of the author to search for:");
         String userInput = in.nextLine();
         
-        String sql = "SELECT Name, DOB FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
+        String sql = "SELECT Name, DOB FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
         sql = sql.replace("$value", "'"+userInput+"'");
         
         DBUtils.retrieveRows(conn, sql);
@@ -47,10 +48,10 @@ public class ActorController implements DBItemController {
 
 	@Override
 	public String[] retrieve(Connection conn, Scanner in) {
-		System.out.println("Please enter the name of the actor to search for:");
+		System.out.println("Please enter the name of the author to search for:");
         String userInput = in.nextLine();
         
-        String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
+        String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
         sql = sql.replace("$value", "'"+userInput+"'");
         
         return new String[] {DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2)};

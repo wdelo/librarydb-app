@@ -3,6 +3,6 @@ import java.util.Scanner;
 
 public interface UserOption {
 
-	public void execute(Connection conn, Scanner s);
+	public void execute(Connection conn, Scanner in);
 	
 }
