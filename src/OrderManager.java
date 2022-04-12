@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import ldb.util.DBUtils;
+
 //Utility class - handles orders within the database
 public class OrderManager implements UserOption {
 
