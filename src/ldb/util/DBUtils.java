@@ -1,4 +1,4 @@
-
+package ldb.util;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -177,6 +177,42 @@ public class DBUtils
 	        p.executeUpdate();  	
 	       	p.close();
 	       	System.out.println("Insertion successful.");
+	    } catch (SQLException e) {
+	        System.out.println(e.getMessage());
+	    }
+	}
+	
+	// Deletes a record
+	public static void deleteRecord(Connection conn, String sql) {
+		try {			
+			PreparedStatement p = conn.prepareStatement(sql);
+			p.executeUpdate();
+			p.close();
+			System.out.println("Deletion successful.");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		
+	}
+	
+	// edits a record
+	public static void editRecord(Connection conn, String table, String... values) {
+		try {			
+			String[] attributes = DBUtils.getAttributes(conn, table);
+			
+			
+			String sql = "UPDATE $tableName SET ";
+	        sql = sql.replace("$tableName", table);
+	        for (int i = 0; i < values.length; i++) {
+	        	sql = sql + attributes[i] + "=" + values[i] + ", ";
+	        }   
+	        sql = sql.substring(0, sql.lastIndexOf(',')); 
+	        sql = sql + " WHERE " + attributes[0] + "=" + values[0] + ";";
+	        
+	        PreparedStatement p = conn.prepareStatement(sql);
+	        p.executeUpdate();  	
+	       	p.close();
+	       	System.out.println("Update successful.");
 	    } catch (SQLException e) {
 	        System.out.println(e.getMessage());
 	    }
