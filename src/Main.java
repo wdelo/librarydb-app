@@ -3,20 +3,48 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import ldb.dbitem.*;
+import ldb.util.DBUtils;
 
 public class Main {
 	
 	// Name of the DB file
 	private static String DATABASE = "Media_DB4.db";
 	
-	private static Map<Integer, UserOption> initializeOptionMap() {
+	private static List<DBItemController> initializeDBItemControllers() {
+		List<DBItemController> dbItems = new ArrayList<>();
+		ActorController actor = new ActorController();
+		ArtistController artist = new ArtistController();
+		AuthorController author = new AuthorController();
+		AlbumController album = new AlbumController(artist);
+		
+		dbItems.add(new MovieController(actor));
+		dbItems.add(new AlbumController(artist));
+		dbItems.add(new TrackController(album));
+		dbItems.add(new BookController(author));
+		dbItems.add(actor);
+		dbItems.add(artist);
+		dbItems.add(author);
+		dbItems.add(new PatronController());
+		dbItems.add(new ReviewController());
+		dbItems.add(new CheckoutController());
+		dbItems.add(new ConditionController());
+		
+		return dbItems;
+	}
+	
+	
+	private static Map<Integer, UserOption> initializeOptionMap(List<DBItemController> dbItems) {
 		Map<Integer, UserOption> optionMap = new HashMap<>();
-		optionMap.put(1, new InsertionManager());
-		optionMap.put(2, new ModifyManager());
-		optionMap.put(3, new SearchManager());
+		optionMap.put(1, new InsertionManager(dbItems));
+		optionMap.put(2, new ModifyManager(dbItems));
+		optionMap.put(3, new SearchManager(dbItems));
 		optionMap.put(4, new OrderManager());
 		optionMap.put(5, new ReportManager());
 		optionMap.put(6, null);
@@ -28,7 +56,8 @@ public class Main {
 	{
         Connection conn = initializeDB(DATABASE);
         Scanner s = new Scanner(System.in);   
-        Map<Integer, UserOption> optionMap = initializeOptionMap();
+        List<DBItemController> dbItems = initializeDBItemControllers();
+        Map<Integer, UserOption> optionMap = initializeOptionMap(dbItems);
         
         
         int userChoice = 0;
