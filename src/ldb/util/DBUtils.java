@@ -7,13 +7,21 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+
+import ldb.dbitem.DBItemController;
 
 // Utility class - holds some useful methods used throughout the rest of the project
 // Methods are organized in alphabetical order
 public class DBUtils 
 {
+	private static final int ENTRYSTRINGLENGTH = 30;
+	
 	// Class cannot be instantiated
 	private DBUtils () {}
 	
@@ -73,7 +81,7 @@ public class DBUtils
 		return null;
 	}
 	
-	// Returns a formatted date in the form year-month-day (mainly for use in insertion)
+	// Returns a formatted date in the form year-month-day for insertion purposes
 	public static String getFormattedDate(Scanner s) {
 		System.out.println("Please enter the year, or 0 if unknown:");
 		int year = getValidInput(0, 9999, s);
@@ -132,7 +140,6 @@ public class DBUtils
 	}
 	
 	// Returns a unique ID meant to be used as a MediaID or CallNumber
-	// Format is '123456789'
 	public static String getUniqueID(Connection conn, String table, String attributeName, int numChars) {
 		String s = "";
 		Random r = new Random();
@@ -231,238 +238,112 @@ public class DBUtils
 	    return true;
 	}
 
-	// Retrieves and prints out rows based on a given SQL statement
-	public static void retrieveRows(Connection conn, String sql) {
-		try {
-			PreparedStatement p = conn.prepareStatement(sql);
-			ResultSet rs = p.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-    	
-			int numAttributes = rsmd.getColumnCount();
-			for (int i = 1; i <= numAttributes; i++) {
-				System.out.printf("%30s", rsmd.getColumnName(i));
-			}
-    	
-			System.out.print("\n");
-			while (rs.next()) {
-				for (int i = 1; i <= numAttributes; i++) {
-					String attributeValue = rs.getString(i);
-					System.out.printf("%30s", attributeValue);
-				}
-				System.out.println();
-			}
-    	
-			rs.close();
-			p.close();
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+	public static void printString(String s, int length) {
+		boolean tooLong = s.length() > length;
+		for (int i = 0; i < length; i++) {	
+			if (tooLong && i >= length - 3)
+				System.out.print("...");
+			else if (i < s.length())
+				System.out.print(s.charAt(i));
+			else
+				System.out.print(" ");
 		}
 	}
 	
-	// Does a normal search, then prompts the user to choose one of the results
-	// The value of attributeName of the user-chosen row is then returned
-	// maxColumn is the max column number that will be printed when displaying rows. Useful if you want to hide the output of a certain
-	// attribute but still be able to select it (for example, MediaID).
-	public static String searchAndSelect(Connection conn, Scanner s, String sql, String attributeName, int maxColumn) {
+	public static void printRow(Connection conn, String sql, int inclusionBoundary) {
 		try {
 			PreparedStatement p = conn.prepareStatement(sql);
-			ResultSet rs = p.executeQuery();
+			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
-    	
-			int colNum = 0;
+			rs.next();
 			
-			System.out.println("    ");
-			int numAttributes = rsmd.getColumnCount();
-			if (maxColumn < 0 && maxColumn > numAttributes) {
-				maxColumn = numAttributes;
-			}
-			for (int i = 1; i <= numAttributes; i++) {
-				String colName = rsmd.getColumnName(i);
-				if (i <= maxColumn ) {
-					System.out.printf("%30s", colName);
-				}
-				if (colName.equals(attributeName)) {
-					colNum = i;
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				if (i <= inclusionBoundary) {
+					printString(rsmd.getColumnName(i), ENTRYSTRINGLENGTH);				
+					System.out.print(":\t");
+					System.out.print(rs.getString(i)+"\n");
 				}
 			}
 			
-			ArrayList<String> values = new ArrayList<String>();
-    	
-			int counter = 0;
-			System.out.print("\n");
-			while (rs.next()) {
-				System.out.print(counter+1);
-				for (int i = 1; i <= numAttributes; i++) {
-					String attributeValue = rs.getString(i);
-					if (i <= maxColumn) {
-						System.out.printf("%30s", attributeValue);
-					}				
-					if (i == colNum) {
-						values.add(attributeValue);
-					}
-				}
-				System.out.println();
-				counter++;
-			}
-			
-			int selection = 0;
-			if (counter > 0) {
-				System.out.println("Pick one of the entries (1-"+counter+"):");
-				selection = getValidInput(1, counter, s);
-				return values.get(selection-1);
-			} else {
-				System.out.println("Oops! Looks like there aren't any rows for those specifications.");
-			}
-    	
 			rs.close();
 			p.close();
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
-		return null;
 	}
 	
-	// The glory of searchAndSelect but with 2 attributes!!!!!!!!!!!!!
-	public static String[] searchAndSelect2(Connection conn, Scanner s, String sql, String attributeName1, String attributeName2, int maxColumn) {
+	public static int printRows(Connection conn, String sql, int inclusionBoundary) {
+		int entryNum = 0;
 		try {
 			PreparedStatement p = conn.prepareStatement(sql);
-			ResultSet rs = p.executeQuery();
+			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
-    	
-			int colNum1 = 0;
-			int colNum2 = 0;
-			
-			System.out.println("    ");
-			int numAttributes = rsmd.getColumnCount();
-			if (maxColumn < 0 && maxColumn > numAttributes) {
-				maxColumn = numAttributes;
-			}
-			for (int i = 1; i <= numAttributes; i++) {
-				String colName = rsmd.getColumnName(i);
-				if (i <= maxColumn ) {
-					System.out.printf("%30s", colName);
-				}
-				if (colName.equals(attributeName1)) {
-					colNum1 = i;
-				}
-				if (colName.equals(attributeName2)) {
-					colNum2 = i;
+
+			System.out.print("\t");
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				if (i <= inclusionBoundary) {
+					printString(rsmd.getColumnName(i), ENTRYSTRINGLENGTH);				
+					System.out.print("\t");	
 				}
 			}
+			System.out.print("\n\n");
 			
-			ArrayList<String> values1 = new ArrayList<String>();
-			ArrayList<String> values2 = new ArrayList<String>();
-    	
-			int counter = 0;
-			System.out.print("\n");
 			while (rs.next()) {
-				System.out.print(counter+1);
-				for (int i = 1; i <= numAttributes; i++) {
-					String attributeValue = rs.getString(i);
-					if (i <= maxColumn) {
-						System.out.printf("%30s", attributeValue);
+				entryNum++;
+				System.out.print(entryNum+".\t");
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					if (i <= inclusionBoundary) {
+						printString(rs.getString(i), ENTRYSTRINGLENGTH);		
+						System.out.print("\t");
 					}				
-					if (i == colNum1) {
-						values1.add(attributeValue);
-					}
-					if (i == colNum2) {
-						values2.add(attributeValue);
-					}
 				}
 				System.out.println();
-				counter++;
 			}
 			
-			int selection = 0;
-			if (counter > 0) {
-				System.out.println("Pick one of the entries (1-"+counter+"):");
-				selection = getValidInput(1, counter, s);
-				String attributes[] = {values1.get(selection-1), values2.get(selection-1)};
-				return attributes;
-			} else {
-				System.out.println("Oops! Looks like there aren't any rows for those specifications.");
-			}
-    	
 			rs.close();
 			p.close();
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
-		return null;
-	}
+		return entryNum;
+	}	
 	
-	// I'm lazy and don't wanna generalize this right now so searchAndSelect with 3 attributes!!!!!!!!!!!
-	public static String[] searchAndSelect3(Connection conn, Scanner s, String sql, String attributeName1, String attributeName2,
-			String attributeName3,int maxColumn) {
-		try {
-			PreparedStatement p = conn.prepareStatement(sql);
-			ResultSet rs = p.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-    	
-			int colNum1 = 0;
-			int colNum2 = 0;
-			int colNum3 = 0;
+	// First, Prints out rows based on the [sql] query, but only the attributes up to and including row number [inclusionBoundary]
+	// Then, the user is able to select one of the rows that has been printed out
+	// Finally, returns an array of the values of each [attribute[i]] in that row, in the order passed to the procedure 
+	public static String[] searchAndSelect(Connection conn, Scanner s, String sql, int inclusionBoundary, String... attributes) {
+		try {  	
+			String values[] = new String[attributes.length];
 			
-			System.out.println("    ");
-			int numAttributes = rsmd.getColumnCount();
-			if (maxColumn < 0 && maxColumn > numAttributes) {
-				maxColumn = numAttributes;
-			}
-			for (int i = 1; i <= numAttributes; i++) {
-				String colName = rsmd.getColumnName(i);
-				if (i <= maxColumn ) {
-					System.out.printf("%30s", colName);
-				}
-				if (colName.equals(attributeName1)) {
-					colNum1 = i;
-				}
-				if (colName.equals(attributeName2)) {
-					colNum2 = i;
-				}
-				if (colName.equals(attributeName3)) {
-					colNum3 = i;
-				}
-			}
+			int numRows = printRows(conn, sql, inclusionBoundary);
 			
-			ArrayList<String> values1 = new ArrayList<String>();
-			ArrayList<String> values2 = new ArrayList<String>();
-			ArrayList<String> values3 = new ArrayList<String>();
-    	
-			int counter = 0;
-			System.out.print("\n");
-			while (rs.next()) {
-				System.out.print(counter+1);
-				for (int i = 1; i <= numAttributes; i++) {
-					String attributeValue = rs.getString(i);
-					if (i <= maxColumn) {
-						System.out.printf("%30s", attributeValue);
-					}				
-					if (i == colNum1) {
-						values1.add(attributeValue);
-					}
-					if (i == colNum2) {
-						values2.add(attributeValue);
-					}
-					if (i == colNum3) {
-						values3.add(attributeValue);
+			if (numRows > 0) {
+				System.out.println("\nPick one of the entries (1-"+numRows+"):");
+				int selection = getValidInput(1, numRows, s);
+				
+				PreparedStatement select = conn.prepareStatement(sql);
+				ResultSet rsSelect = select.executeQuery();
+				ResultSetMetaData rsmd = rsSelect.getMetaData();
+				
+				for (int i = 0; i < selection; i++)
+					rsSelect.next();
+				
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					for (int j = 0; j < attributes.length; j++) {
+						if (rsmd.getColumnName(i).equals(attributes[j])) {
+							values[j] = rsSelect.getString(i);
+							break;
+						}
 					}
 				}
-				System.out.println();
-				counter++;
-			}
-			
-			int selection = 0;
-			if (counter > 0) {
-				System.out.println("Pick one of the entries (1-"+counter+"):");
-				selection = getValidInput(1, counter, s);
-				String attributes[] = {values1.get(selection-1), values2.get(selection-1), values3.get(selection-1)};
-				return attributes;
+				
+				rsSelect.close();
+				select.close();
+				
+				return values;
 			} else {
 				System.out.println("Oops! Looks like there aren't any rows for those specifications.");
 			}
-    	
-			rs.close();
-			p.close();
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}

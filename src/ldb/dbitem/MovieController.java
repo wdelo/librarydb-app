@@ -40,9 +40,9 @@ public class MovieController implements DBItemController {
 				String actorName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
 		        sql = sql.replace("$value", "'"+actorName+"'");
-				String actorId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] actorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (actorId != null) {
-					actorIds.add(actorId);
+					actorIds.add(actorId[0]);
 				}
 				System.out.println("Are there any more actors in this movie that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -113,34 +113,34 @@ public class MovieController implements DBItemController {
         String sql = "";
 		switch (userChoice) {
 		case 1:
-			sql = "SELECT Title, Genre, Year, Content_Rating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Title = $value;";
+			sql = "SELECT Title, Genre, Year, ContentRating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Title = $value;";
 			System.out.println("Please enter a movie title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:
-			sql = "SELECT Title, Genre, Year, Content_Rating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Genre = $value;";
+			sql = "SELECT Title, Genre, Year, ContentRating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Genre = $value;";
 			System.out.println("Please enter a movie genre to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;		
 		case 3:
-			sql = "SELECT Title, Genre, Year, Content_Rating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Year = $value;";
+			sql = "SELECT Title, Genre, Year, ContentRating, Length FROM Movie JOIN Media ON MediaID = MovieID WHERE Year = $value;";
 			System.out.println("Please enter a movie year to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 4:
-			sql = "SELECT Title, Genre, Year, Content_Rating, Length FROM Movie AS M JOIN Media AS Med ON Med.MediaID = M.MovieID "
-				+"JOIN Contributes_To AS C ON M.MovieID = C.MediaID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID "
+			sql = "SELECT Title, Genre, Year, ContentRating, Length FROM Movie AS M JOIN Media AS Med ON Med.MediaID = M.MovieID "
+				+"JOIN ContributesTo AS C ON M.MovieID = C.MediaID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID "
 					+"WHERE Con.Name = $value;";
 			System.out.println("Please enter an actor name to search for their movies:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -185,7 +185,7 @@ public class MovieController implements DBItemController {
 		default:
 			break;
 		}
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "MovieID", 5)};
+		return DBUtils.searchAndSelect(conn, in, sql, 5, "MovieID");
 	}
 
 }

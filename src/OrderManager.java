@@ -53,7 +53,7 @@ public class OrderManager implements UserOption {
     	String title = s.nextLine();
     	System.out.println("Please select the corresponding media.");
     	String MediaID = DBUtils.searchAndSelect(conn, s,
-            	"SELECT * FROM Media WHERE Title = " + "'"+title+"'", "MediaID", 100);
+            	"SELECT * FROM Media WHERE Title = " + "'"+title+"'", 99, "MediaID")[0];
     	if (MediaID != null) {
     	DBUtils.insertRecord(conn, "[Order]", "'" + orderID + "'",
             	"'" + arrivalStatus + "'", "'" + price + "'",

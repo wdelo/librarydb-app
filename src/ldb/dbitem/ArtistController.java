@@ -43,7 +43,7 @@ public class ArtistController implements DBItemController {
         String sql = "SELECT Name, DOB FROM Contributor WHERE PrimaryRole = 'Artist' AND Name = $value;";
         sql = sql.replace("$value", "'"+userInput+"'");
         
-        DBUtils.retrieveRows(conn, sql);
+        DBUtils.printRows(conn, sql, 99);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class ArtistController implements DBItemController {
         String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
         sql = sql.replace("$value", "'"+userInput+"'");
         
-        return new String[] {DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2)};
+        return DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 	}
 
 }

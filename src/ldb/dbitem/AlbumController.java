@@ -36,9 +36,9 @@ public class AlbumController implements DBItemController {
 				String artistName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Artist' AND Name = $value;";
 			    sql = sql.replace("$value", "'"+artistName+"'");
-				String artistId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] artistId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (artistId != null) {
-					artistIds.add(artistId);
+					artistIds.add(artistId[0]);
 				}
 				System.out.println("Are there any more artists of this album that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -127,21 +127,21 @@ public class AlbumController implements DBItemController {
 			System.out.println("Please enter an album title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:
 			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Genre = $value;";
 			System.out.println("Please enter an album genre to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 3:
 			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Year = $value;";
 			System.out.println("Please enter an album year to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 4:
 			sql = "SELECT Title, Genre, Year FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
@@ -150,7 +150,7 @@ public class AlbumController implements DBItemController {
 			System.out.println("Please enter an artist name to search for their albums:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -198,7 +198,7 @@ public class AlbumController implements DBItemController {
 		default:
 			break;
 		}
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3)};
+		return DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
 
 }

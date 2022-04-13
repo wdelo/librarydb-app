@@ -15,7 +15,7 @@ import ldb.util.DBUtils;
 public class Main {
 	
 	// Name of the DB file
-	private static String DATABASE = "Media_DB4.db";
+	private static String DATABASE = "LibraryDB.db";
 	
 	private static List<DBItemController> initializeDBItemControllers() {
 		List<DBItemController> dbItems = new ArrayList<>();
@@ -39,7 +39,6 @@ public class Main {
 		return dbItems;
 	}
 	
-	
 	private static Map<Integer, UserOption> initializeOptionMap(List<DBItemController> dbItems) {
 		Map<Integer, UserOption> optionMap = new HashMap<>();
 		optionMap.put(1, new InsertionManager(dbItems));
@@ -57,8 +56,7 @@ public class Main {
         Connection conn = initializeDB(DATABASE);
         Scanner s = new Scanner(System.in);   
         List<DBItemController> dbItems = initializeDBItemControllers();
-        Map<Integer, UserOption> optionMap = initializeOptionMap(dbItems);
-        
+        Map<Integer, UserOption> optionMap = initializeOptionMap(dbItems);       
         
         int userChoice = 0;
         
@@ -116,8 +114,4 @@ public class Main {
         return conn;
     }
 	
-	
 }
-
-
-

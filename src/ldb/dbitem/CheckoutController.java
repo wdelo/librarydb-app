@@ -13,14 +13,14 @@ public class CheckoutController implements DBItemController {
 		String lname = in.nextLine();
 		
 		String sql = "SELECT Email_Address, Fname, Lname FROM Patron WHERE Lname = '"+lname+"';";
-		String email = DBUtils.searchAndSelect(conn, in, sql, "Email_Address", 3);
+		String[] email = DBUtils.searchAndSelect(conn, in, sql, 3, "Email_Address");
 		
 		System.out.println("Let's find the piece of media this patron is checking out. Please enter its title:");
 		String title = in.nextLine();
 		
 		sql = "SELECT Call_Number, Title, Genre, Year FROM Media_Instance AS MI JOIN Media AS M ON MI.MediaID = M.MediaID "
 				+ "WHERE Title = '"+title+"' AND Availability = 1;";
-		String callNum = DBUtils.searchAndSelect(conn, in, sql, "Call_Number", 4);
+		String[] callNum = DBUtils.searchAndSelect(conn, in, sql, 4, "Call_Number");
 		
 		if (email != null && callNum != null) {
 			System.out.println("Let's get an initial checkout date.");
@@ -35,7 +35,7 @@ public class CheckoutController implements DBItemController {
 				DBUtils.insertRecord(conn, "Checkout", "'"+callNum+"'", "'"+email+"'", date, "NULL");
 			}	
 			
-			return new String[] { callNum, email, date };
+			return new String[] { callNum[0], email[0], date };
 		} else {
 			System.out.println("Error inserting: nonexistant patron or media OR no available media");
 			
@@ -46,7 +46,8 @@ public class CheckoutController implements DBItemController {
 
 	@Override
 	public void edit(Connection conn, Scanner in, String[] ids) {
-		// TODO Auto-generated method stub
+		for (int i = 0; i < ids.length; i++)
+			System.out.println(ids[i]);
 
 	}
 
@@ -74,7 +75,7 @@ public class CheckoutController implements DBItemController {
 			System.out.println("Please enter a media title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:
 			sql = "SELECT Title, C.Call_Number, C.Email_Address, Checkout_date, Return_Date "
@@ -85,7 +86,7 @@ public class CheckoutController implements DBItemController {
 			System.out.println("Please enter a patron email to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;		
 		default:
 			break;
@@ -103,9 +104,9 @@ public class CheckoutController implements DBItemController {
         
 		switch (userChoice) {
 		case 1:
-			sql = "SELECT Title, C.Call_Number, C.Email_Address, Checkout_date, Return_Date "
-					+ "FROM Checkout AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number "
-					+ "JOIN Patron AS P ON P.Email_Address = C.Email_Address "
+			sql = "SELECT Title, C.CallNumber, C.PatronEmail, CheckoutDate, ReturnDate "
+					+ "FROM Checkout AS C JOIN MediaInstance AS M ON C.CallNumber = M.CallNumber "
+					+ "JOIN Patron AS P ON P.Email = C.PatronEmail "
 					+ "JOIN Media AS Med ON M.MediaID = Med.MediaID "
 					+ "WHERE Title = $value;";
 			System.out.println("Please enter a media title to search for:");
@@ -113,11 +114,11 @@ public class CheckoutController implements DBItemController {
 			sql = sql.replace("$value", "'"+userInput+"'");
 			break;
 		case 2:
-			sql = "SELECT Title, C.Call_Number, C.Email_Address, Checkout_date, Return_Date "
-					+ "FROM Checkout AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number "
-					+ "JOIN Patron AS P ON P.Email_Address = C.Email_Address "
+			sql = "SELECT Title, C.CallNumber, C.PatronEmail, CheckoutDate, ReturnDate "
+					+ "FROM Checkout AS C JOIN MediaInstance AS M ON C.CallNumber = M.CallNumber "
+					+ "JOIN Patron AS P ON P.Email = C.PatronEmail "
 					+ "JOIN Media AS Med ON M.MediaID = Med.MediaID "
-					+ "WHERE C.Email_Address = $value;";
+					+ "WHERE C.PatronEmail = $value;";
 			System.out.println("Please enter a patron email to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
@@ -125,7 +126,7 @@ public class CheckoutController implements DBItemController {
 		default:
 			break;
 		}
-		return DBUtils.searchAndSelect3(conn, in, sql, "Call_Number", "Email_Address", "Checkout_date", 4);
+		return DBUtils.searchAndSelect(conn, in, sql, 4, "CallNumber", "PatronEmail", "CheckoutDate");
 	}
 
 }

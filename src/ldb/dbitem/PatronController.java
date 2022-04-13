@@ -72,28 +72,28 @@ public class PatronController implements DBItemController {
 			userInput = in.nextLine();
 			sql = sql.replace("$attribute", "Email_Address");
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:
 			System.out.println("Please enter a city to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$attribute", "City");
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 3:
 			System.out.println("Please enter a state to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$attribute", "State");
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 4:
 			System.out.println("Please enter a last name to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$attribute", "Lname");
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -136,7 +136,7 @@ public class PatronController implements DBItemController {
 		default:
 			break;
 		}
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "Email_Address", 6)};
+		return DBUtils.searchAndSelect(conn, in, sql, 6, "Email_Address");
 	}
 
 }

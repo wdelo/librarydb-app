@@ -36,9 +36,9 @@ public class BookController implements DBItemController {
 				String authorName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
 			    sql = sql.replace("$value", "'"+authorName+"'");
-				String authorId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] authorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (authorId != null) {
-					authorIds.add(authorId);
+					authorIds.add(authorId[0]);
 				}
 				System.out.println("Are there any more authors of this book that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -108,21 +108,21 @@ public class BookController implements DBItemController {
 			System.out.println("Please enter a book title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:	
 			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Genre = $value;";
 			System.out.println("Please enter a book genre to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 3:
 			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Year = $value;";
 			System.out.println("Please enter a book year to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 4:
 			sql = "SELECT Title, Genre, Year FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
@@ -131,7 +131,7 @@ public class BookController implements DBItemController {
 			System.out.println("Please enter an author name to search for their books:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -176,7 +176,7 @@ public class BookController implements DBItemController {
 		default:
 			break;
 		}
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3)};
+		return DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
 
 }

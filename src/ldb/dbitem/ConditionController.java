@@ -14,7 +14,7 @@ public class ConditionController implements DBItemController {
 		
 		String sql = "SELECT Call_Number, Title, Genre, Year, Availability FROM Media_Instance AS MI JOIN Media AS M ON MI.MediaID = M.MediaID "
 				+ "WHERE Title = '"+title+"';";
-		String callNum = DBUtils.searchAndSelect(conn, in, sql, "Call_Number", 4);
+		String[] callNum = DBUtils.searchAndSelect(conn, in, sql, 4, "Call_Number");
 		
 		if (callNum != null) {
 			System.out.println("Let's get the date this condition is associated with.");
@@ -28,7 +28,7 @@ public class ConditionController implements DBItemController {
 			System.out.println("What is the reason for the current condition of this piece of media?");
 			String reason = in.nextLine();
 			DBUtils.insertRecord(conn, "Condition", date, "'"+callNum+"'", "'"+condition+"'", ""+missing, "'"+reason+"'");
-			return new String[] {date, callNum};
+			return new String[] {date, callNum[0]};
 		} else {
 			System.out.println("Error inserting: nonexistant media OR no available media");
 			return null;
@@ -61,7 +61,7 @@ public class ConditionController implements DBItemController {
 			System.out.println("Please enter a media title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		case 2:
 			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
@@ -69,7 +69,7 @@ public class ConditionController implements DBItemController {
 			System.out.println("Please enter a damage condition (Good, Poor, etc.) to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;	
 		case 3: 
 			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
@@ -77,7 +77,7 @@ public class ConditionController implements DBItemController {
 			System.out.println("Would you like to search for:\n1. Missing pieces of media\n2. Non-missing pieces of media");
 			int missing = DBUtils.getValidInput(1, 2, in);
 			sql = sql.replace("$value", "'"+Math.abs(missing-2)+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRows(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -117,7 +117,7 @@ public class ConditionController implements DBItemController {
 		default:
 			break;
 		}
-		return DBUtils.searchAndSelect2(conn, in, sql, "Date", "Call_Number", 3);
+		return DBUtils.searchAndSelect(conn, in, sql, 3, "Date", "Call_Number");
 	}
 
 }

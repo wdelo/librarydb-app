@@ -38,7 +38,9 @@ public class TrackController implements DBItemController {
 					String sql = "SELECT Title, Genre, Year, AudioID FROM Media JOIN Audio ON MediaID = AudioID "
 						+ "WHERE [Album/Audiobook] = 'a' AND Title = $value";
 					sql = sql.replace("$value", "'"+albumName+"'");
-					id = DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3);
+					String[] potentialID = DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
+					if (potentialID != null)
+						id = potentialID[0];
 				} else {
 					System.out.println("Let's add it.");
 					System.out.println("What is the title of this album?");
@@ -108,7 +110,7 @@ public class TrackController implements DBItemController {
 			System.out.println("Please enter a track title to search for:");
 			userInput = in.nextLine();
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRow(conn, sql, 99);
 			break;
 		case 2:
 			sql = "SELECT Track_Title, Length FROM Audio AS A JOIN Track AS T ON A.AudioID = T.AudioID JOIN Media ON A.AudioID = MediaID "
@@ -117,7 +119,7 @@ public class TrackController implements DBItemController {
 			userInput = in.nextLine();
 			sql = sql.replace("$attribute", "Title");
 			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
+			DBUtils.printRow(conn, sql, 99);
 			break;
 		default:
 			break;
@@ -152,7 +154,7 @@ public class TrackController implements DBItemController {
 		default:
 			break;
 		}
-		return DBUtils.searchAndSelect2(conn, in, sql, "AudioID", "Track_Number", 2);
+		return DBUtils.searchAndSelect(conn, in, sql, 2, "AudioID", "Track_Number");
 	}
 
 }
