@@ -7,9 +7,27 @@ import java.util.Scanner;
 
 import ldb.UserOption;
 import ldb.util.DBUtils;
+import ldb.util.MenuScreen;
 
 public class TrackController {
 
+	private static String menuPrompt = "What would you like to manage with this audio's tracks?";	
+	private static String[] menuScreenOptions = {
+    		"Add a track", 
+    		"View tracks",
+    		"Back",
+	};
+	
+	private static String selectedMenuPrompt = "What would you like to do with this track?";
+	private static String[] selectedMenuScreenOptions = {
+			"Delete this track",
+			"Edit this track",
+			"Back",
+	};
+	
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
+	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	
 	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("Please enter the title of the track:");
 		String title = in.nextLine();
@@ -118,13 +136,35 @@ public class TrackController {
 	}
 	
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
-		// TODO Auto-generated method stub
+		menuScreen.display();
+		int menuSelection = menuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			insert(conn, in, parentIds);
+			break;
+		case 2:
+			view(conn, in, parentIds);
+			break;
+		case 3:
+			break;
+		}
 		
 	}
 	
 	public static void view(Connection conn, Scanner in, String[] parentIds) {
-		
+		String[] ids = retrieve(conn, in, parentIds);
+		selectedMenuScreen.display();
+		int menuSelection = selectedMenuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		case 3:
+			break;
+		}
 	}
-
-
+	
 }
