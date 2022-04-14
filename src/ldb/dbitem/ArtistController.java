@@ -136,7 +136,7 @@ public class ArtistController {
 	}
 	
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:

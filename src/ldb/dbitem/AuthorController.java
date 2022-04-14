@@ -68,7 +68,7 @@ public class AuthorController {
 	}
         
 	public static void execute(Connection conn, Scanner in) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 			case 1:
@@ -138,7 +138,7 @@ public class AuthorController {
 
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
 		// TODO Auto-generated method stub
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:

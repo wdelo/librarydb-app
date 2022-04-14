@@ -90,14 +90,12 @@ public class OrderController {
 	public static String[] retrieve(Connection conn, Scanner in) {
 			
 		String sql = "SELECT Title, [Digital/Physical], ETA, NumCopies, Price, OrderID, M.MediaID FROM [Order] AS O JOIN Media AS M ON O.MediaID = M.MediaID;";
-		     
-        DBUtils.blank();
 	
 		return DBUtils.searchAndSelect(conn, in, sql, 5, "OrderId", "MediaID", "NumCopies", "Digital/Physical");
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 			case 1:

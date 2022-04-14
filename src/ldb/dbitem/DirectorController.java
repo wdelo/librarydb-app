@@ -58,7 +58,7 @@ public class DirectorController{
 	}
 	
 	public static void execute(Connection conn, Scanner in) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:
@@ -134,7 +134,7 @@ public class DirectorController{
 	}
 
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:

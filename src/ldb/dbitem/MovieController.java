@@ -170,14 +170,12 @@ public class MovieController {
 			String userInput = in.nextLine();
 			sql = sql.replace(";", " WHERE Title = '"+userInput+"';");
 		}       
-		
-        DBUtils.blank();
 	
 		return DBUtils.searchAndSelect(conn, in, sql, 5, "MovieID");
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:
@@ -212,7 +210,6 @@ public class MovieController {
 				if (callNumber != null)
 					ConditionController.execute(conn, in, callNumber);
 				else {
-					DBUtils.blank();
 					System.out.println("No condition logs for this movie :(\nType \"1\" to continue to the main menu.");
 					DBUtils.getValidInput(1, 1, in);
 				}
