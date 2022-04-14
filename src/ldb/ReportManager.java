@@ -215,6 +215,7 @@ public class ReportManager implements UserOption {
 				System.out.print("Enter Number Selection: ");
 			}
 		}
+		s.nextLine();
     }
 }
 
