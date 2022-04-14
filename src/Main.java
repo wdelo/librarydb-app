@@ -100,7 +100,6 @@ public class Main {
 		String[] mediaMenuScreenOptions = {
 				"Manage movies",
 				"Manage albums",
-				"Manage tracks",
 				"Manage audiobooks",
 				"Back",
 		};

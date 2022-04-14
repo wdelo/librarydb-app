@@ -6,9 +6,31 @@ import java.util.Scanner;
 
 import ldb.UserOption;
 import ldb.util.DBUtils;
+import ldb.util.MenuScreen;
 
 public class BookController {
 
+	private static String bookMenuPrompt = "What would you like to manage with audiobooks?";	
+	private static String[] bookMenuScreenOptions = {
+    		"Add an audiobook", 
+    		"Select an audiobook",
+    		"Back",
+	};
+	
+	private static String selectedMenuPrompt = "What would you like to do with this audiobook?";
+	private static String[] selectedMenuScreenOptions = {
+			"Delete this audiobook",
+			"Edit this audiobook",
+			"View condition log",
+			"View reviews",
+			"View authors",
+			"View chapters",
+			"Back",
+	};
+	
+	private static MenuScreen menuScreen = new MenuScreen(bookMenuPrompt, bookMenuScreenOptions);
+	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	
 	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the title of the book:");
 		String title = in.nextLine();
@@ -97,12 +119,57 @@ public class BookController {
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		// TODO Auto-generated method stub
-		
+		menuScreen.display();
+		int menuSelection = menuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			insert(conn, in);
+			break;
+		case 2:
+			view(conn, in);
+			break;
+		case 3:
+			break;
+		}
 	}
 	
 	public static void view(Connection conn, Scanner in) {
-		
+		String[] ids = retrieve(conn, in);
+		if (ids == null) {
+			System.out.println("Something went wrong retrieving that audiobook.");
+			return;
+		}
+		selectedMenuScreen.display();
+		int menuSelection = selectedMenuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		case 3:
+			// condition log
+			// search and select audiobook instances
+			String sql = "SELECT Title, CallNumber, [Digital/Physical], IsAvailable, Location FROM "
+							+ "Media AS M JOIN MediaInstance AS I ON M.MediaID = I.MediaID WHERE M.MediaID = '"+ids[0]+"'"
+							+ "AND [Digital/Physical] = 'p'";
+			String[] instanceId = DBUtils.searchAndSelect(conn, in, sql, 5, "CallNumber");
+			// then execute condition using movie instances
+			ConditionController.execute(conn, in, instanceId); // change ids to movie instance ids
+			break;
+		case 4:
+			ReviewController.execute(conn, in, ids);
+			break;
+		case 5:
+			ActorController.execute(conn, in, ids);
+			break;
+		case 6:
+			TrackController.execute(conn, in, ids);
+			break;
+		case 7:
+			break;
+		}
 	}
 
 
