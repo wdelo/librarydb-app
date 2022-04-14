@@ -124,6 +124,7 @@ public class Main {
 				new Menu(adminUserOptions, new MenuScreen(manageMenuPrompt, adminMenuScreenOptions)),
 				new OrderManager(),
 				new ReportManager(),
+				null,
 		};
 		
 		return new Menu(menuUserOptions, new MenuScreen(mainMenuPrompt, mainMenuScreenOptions)); 
