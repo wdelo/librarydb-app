@@ -81,11 +81,10 @@ public class CheckoutController {
 	}
 	
 	public static void retrieveByPatron(Connection conn, Scanner in, String[] parentIds) {
-		String sql = "SELECT Med.Title, C.CallNumber, C.CheckoutDate, C.ReturnDate, C.PatronEmail "
-				+ "FROM Checkout AS C JOIN MediaInstance AS M ON C.CallNumber = M.CallNumber "
-				+ "JOIN Patron AS P ON P.Email = C.PatronEmail "
-				+ "JOIN Media AS Med ON M.MediaID = Med.MediaID "
-				+ "WHERE C.PatronEmail = '"+parentIds[0]+"';";
+		String sql = "SELECT Title, C.CallNumber, C.PatronEmail, C.CheckoutDate, C.ReturnDate "
+				+ "FROM Checkout AS C, MediaInstance AS M, Patron AS P, Media AS Med "
+				+ "WHERE C.CallNumber = M.CallNumber AND P.Email = "+"'"+parentIds[0]+"' "
+				+ "AND P.Email = C.PatronEmail AND M.MediaID = Med.MediaID;";
 		
 		DBUtils.printRows(conn, sql, 4);
 	}
