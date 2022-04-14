@@ -3,14 +3,13 @@ package ldb.dbitem;
 import java.sql.Connection;
 import java.util.Scanner;
 
-import ldb.UserOption;
 import ldb.util.DBUtils;
 import ldb.util.MenuScreen;
 
 public class ReviewController {
 
-	private static String conditionMenuPrompt = "What would you like to manage with this condition log?";	
-	private static String[] conditionMenuScreenOptions = {
+	private static String menuPrompt = "What would you like to manage with this condition log?";	
+	private static String[] menuScreenOptions = {
     		"Add a Review", 
     		"Select a Review",
     		"Back",
@@ -23,7 +22,7 @@ public class ReviewController {
 			"Back",
 	};
 	
-	private static MenuScreen menuScreen = new MenuScreen(conditionMenuPrompt, conditionMenuScreenOptions);
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
 	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
 	
 	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
@@ -65,36 +64,22 @@ public class ReviewController {
 		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Patron_Email="+"'"+ids[0]+"'"+" AND MediaID="+"'"+ids[1]+"'");	
 	}
 
-	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Media Title\n2. Patron Email\n");
-        int userChoice = DBUtils.getValidInput(1, 2, in);
+	public static String[] retrieveByMedia(Connection conn, Scanner in, String[] parentIds) {
+		String sql = "SELECT Title, PatronEmail, Rating, Review, R.MediaID FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
+				+ "JOIN Patron AS P ON P.Email_Address = R.Patron_Email WHERE Title = '"+parentIds[0]+"';";
+
+		return DBUtils.searchAndSelect(conn, in, sql, 4, "PatronEmail", "MediaID");
+	}
+	
+	public static void retrieveByPatron(Connection conn, Scanner in, String[] parentIds) {
+		String sql = "SELECT Title, PatronEmail, Rating, Response, R.MediaID FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
+					+ "JOIN Patron AS P ON P.Email = R.PatronEmail WHERE Email = '"+parentIds[0]+"';";
 		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Patron_Email, Rating, Review, R.MediaID FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
-					+ "JOIN Patron AS P ON P.Email_Address = R.Patron_Email WHERE Title = $value;";
-			System.out.println("Please enter a media title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 2:
-			sql = "SELECT Title, Patron_Email, Rating, Review, R.MediaID FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
-					+ "JOIN Patron AS P ON P.Email_Address = R.Patron_Email WHERE Title = $value;";
-			System.out.println("Please enter a patron email to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;		
-		default:
-			break;
-		}
-		return DBUtils.searchAndSelect(conn, in, sql, 4, "Patron_Email", "MediaID");
+		DBUtils.printRows(conn, sql, 4);
 	}
 
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:
@@ -110,7 +95,7 @@ public class ReviewController {
 	}
 	
 	public static void view(Connection conn, Scanner in, String[] parentIds) {
-		String[] ids = retrieve(conn, in, parentIds);
+		String[] ids = retrieveByMedia(conn, in, parentIds);
 		if (ids != null) {
 			selectedMenuScreen.display();
 			int menuSelection = selectedMenuScreen.getOption(in);
@@ -125,7 +110,6 @@ public class ReviewController {
 				break;
 			}	
 		} else {
-			DBUtils.blank();
 			System.out.println("No reviews :(\nType \"1\" to continue to the main menu.");
 			DBUtils.getValidInput(1, 1, in);
 		}
