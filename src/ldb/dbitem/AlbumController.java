@@ -6,8 +6,47 @@ import java.util.Scanner;
 
 import ldb.UserOption;
 import ldb.util.DBUtils;
+import ldb.util.MenuScreen;
 
 public class AlbumController {
+	
+	private static String movieMenuPrompt = "What would you like to manage with albums?";	
+	private static String[] movieMenuScreenOptions = {
+    		"Add an album", 
+    		"Select an album",
+    		"Back",
+	};
+	
+	private static String selectedMenuPrompt = "What would you like to do with this album?";
+	private static String[] selectedMenuScreenOptions = {
+			"Delete this album",
+			"Edit this album",
+			"View condition log",
+			"View reviews",
+			"View authors",
+			"Back",
+	};
+	
+	private static String conditionMenuPrompt = "What changes would you like to make to these conditions?";
+	private static String[] conditionMenuScreenOptions = {
+			"Add a condition",
+			"Delete a condition",
+			"Edit a condition",
+			"Back",
+	};
+	
+	private static String reviewMenuPrompt = "What changes would you like to make to these reviews?";
+	private static String[] reviewMenuScreenOptions = {
+			"Add a review",
+			"Delete a review",
+			"Edit a review",
+			"Back",
+	};
+	
+	private static MenuScreen menuScreen = new MenuScreen(movieMenuPrompt, movieMenuScreenOptions);
+	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	private static MenuScreen conditionMenuScreen = new MenuScreen(conditionMenuPrompt, conditionMenuScreenOptions);
+	private static MenuScreen reviewMenuScreen = new MenuScreen(reviewMenuPrompt, reviewMenuScreenOptions);
 	
 	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the title of the album:");
@@ -121,13 +160,53 @@ public class AlbumController {
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		// TODO Auto-generated method stub
+		menuScreen.display();
+		int menuSelection = menuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			insert(conn, in);
+			break;
+		case 2:
+			view(conn, in);
+			break;
+		}
 		
 	}
 	
 	public static void view(Connection conn, Scanner in) {
+		String[] ids = retrieve(conn, in);
+		selectedMenuScreen.display();
+		int menuSelection = selectedMenuScreen.getOption(in);
 		
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		case 3:
+			// condition log
+			// search and select album instances
+			String sqlCond = "SELECT Title, CallNumber, [Digital/Physical], IsAvailable, Location FROM "
+							+ "Media AS M JOIN MediaInstance AS I ON M.MediaID = I.MediaID WHERE M.MediaID = '"+ids[0]+"'"
+							+ "AND [Digital/Physical] = 'p'";
+			String[] instanceCondId = DBUtils.searchAndSelect(conn, in, sqlCond, 5, "CallNumber");
+			// then execute condition using movie instances
+			ConditionController.execute(conn, in, instanceCondId); // change ids to movie instance ids
+			break;
+		case 4:
+			ReviewController.execute(conn, in, ids);
+			break;
+		case 5:
+			ArtistController.execute(conn, in, ids);
+			break;
+		case 6:
+			TrackController.execute(conn, in, ids);
+			break;
+		case 7:
+			break;
+			}
 	}
-
 
 }
