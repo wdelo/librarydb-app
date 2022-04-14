@@ -11,8 +11,8 @@ import ldb.util.MenuScreen;
 
 public class AlbumController {
 	
-	private static String movieMenuPrompt = "What would you like to manage with albums?";	
-	private static String[] movieMenuScreenOptions = {
+	private static String menuPrompt = "What would you like to manage with albums?";	
+	private static String[] menuScreenOptions = {
     		"Add an album", 
     		"Select an album",
     		"Back",
@@ -24,30 +24,13 @@ public class AlbumController {
 			"Edit this album",
 			"View condition log",
 			"View reviews",
-			"View authors",
+			"View artists",
+			"View tracks",
 			"Back",
 	};
 	
-	private static String conditionMenuPrompt = "What changes would you like to make to these conditions?";
-	private static String[] conditionMenuScreenOptions = {
-			"Add a condition",
-			"Delete a condition",
-			"Edit a condition",
-			"Back",
-	};
-	
-	private static String reviewMenuPrompt = "What changes would you like to make to these reviews?";
-	private static String[] reviewMenuScreenOptions = {
-			"Add a review",
-			"Delete a review",
-			"Edit a review",
-			"Back",
-	};
-	
-	private static MenuScreen menuScreen = new MenuScreen(movieMenuPrompt, movieMenuScreenOptions);
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
 	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
-	private static MenuScreen conditionMenuScreen = new MenuScreen(conditionMenuPrompt, conditionMenuScreenOptions);
-	private static MenuScreen reviewMenuScreen = new MenuScreen(reviewMenuPrompt, reviewMenuScreenOptions);
 	
 	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the title of the album:");
@@ -66,11 +49,7 @@ public class AlbumController {
 			System.out.println("Let's find some.\n");
 			boolean done = false;
 			do {
-				System.out.println("What is the artist's name?");
-				String artistName = in.nextLine();
-				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Artist' AND Name = $value;";
-			    sql = sql.replace("$value", "'"+artistName+"'");
-				String[] artistId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
+				String[] artistId = ArtistController.retrieve(conn, in);
 				if (artistId != null) {
 					artistIds.add(artistId[0]);
 				}
@@ -102,7 +81,7 @@ public class AlbumController {
 		DBUtils.insertRecord(conn, "Audio", id, "'a'");
 			
 		for (int i = 0; i < artistIds.size(); i++)
-			DBUtils.insertRecord(conn, "Contributes_To", id, "'"+artistIds.get(i)+"'", "'Artist'");
+			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+artistIds.get(i)+"'", "'Artist'");
 		
 		System.out.println("Would you like to add tracks to this album?\n1. Yes\n2. No");
 		userChoice = DBUtils.getValidInput(1, 2, in);
@@ -139,22 +118,12 @@ public class AlbumController {
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
 		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Audio WHERE AudioID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Media_Instance WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE MediaID="+ids[0]);
 	}
 
-	public static String[] retrieve(Connection conn, Scanner in) {
-
-        String userInput = "";
-        String sql = "";
-        String id = "";
-        
-
-		sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Title = $value;";
+	public static String[] retrieve(Connection conn, Scanner in) {       
+		String sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Title = $value;";
 		System.out.println("Please enter an album title to search for:");
-		userInput = in.nextLine();
+		String userInput = in.nextLine();
 		sql = sql.replace("$value", "'"+userInput+"'");
 	
 		return  DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
@@ -170,12 +139,18 @@ public class AlbumController {
 		case 2:
 			view(conn, in);
 			break;
+		case 3:
+			break;
 		}
 		
 	}
 	
 	public static void view(Connection conn, Scanner in) {
 		String[] ids = retrieve(conn, in);
+		if (ids == null) {
+			System.out.println("Looks like we don't have that album.");
+			return;
+		}
 		selectedMenuScreen.display();
 		int menuSelection = selectedMenuScreen.getOption(in);
 		
@@ -208,7 +183,7 @@ public class AlbumController {
 		case 7:
 			//do nothing
 			break;
-			}
+		}
 	} 
 
 }
