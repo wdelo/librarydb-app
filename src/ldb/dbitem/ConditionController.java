@@ -97,7 +97,6 @@ public class ConditionController {
 				break;
 			}	
 		} else {
-			DBUtils.blank();
 			System.out.println("No condition logs :(\nType \"1\" to continue to the main menu.");
 			DBUtils.getValidInput(1, 1, in);
 		}

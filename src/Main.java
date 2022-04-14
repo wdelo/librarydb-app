@@ -24,8 +24,7 @@ public class Main {
         Scanner in = new Scanner(System.in);   
         
         Menu mainMenu = createMainMenu();
-
-        DBUtils.blank();
+        
         while (!mainMenu.isExited()) {        	
         	mainMenu.execute(conn, in);
         }

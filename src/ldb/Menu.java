@@ -25,7 +25,7 @@ public class Menu implements UserOption {
 	
 	@Override
 	public void execute(Connection conn, Scanner in) {
-		menuScreen.displayBlank();
+		menuScreen.display();
 		int menuSelection = menuScreen.getOption(in);
 		
 		UserOption option = optionMap.get(menuSelection);
