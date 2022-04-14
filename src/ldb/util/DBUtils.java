@@ -243,6 +243,7 @@ public class DBUtils
 	}
 
 	public static void printString(String s, int length) {
+		if (s == null) s = "NULL";
 		boolean tooLong = s.length() > length;
 		for (int i = 0; i < length; i++) {	
 			if (tooLong && i >= length - 3)
@@ -260,8 +261,6 @@ public class DBUtils
 			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
 			rs.next();
-			
-			DBUtils.blank();
 			
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				if (i <= inclusionBoundary) {
@@ -284,8 +283,6 @@ public class DBUtils
 			PreparedStatement p = conn.prepareStatement(sql);
 			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
-
-			DBUtils.blank();
 			
 			System.out.print("\t");
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
