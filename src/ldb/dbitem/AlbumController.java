@@ -205,8 +205,9 @@ public class AlbumController {
 			TrackController.execute(conn, in, ids);
 			break;
 		case 7:
+			//do nothing
 			break;
 			}
-	}
+	} 
 
 }
