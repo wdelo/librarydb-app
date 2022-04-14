@@ -152,7 +152,7 @@ public class BookController {
 			ReviewController.execute(conn, in, ids);
 			break;
 		case 5:
-			ActorController.execute(conn, in, ids);
+			AuthorController.execute(conn, in, ids);
 			break;
 		case 6:
 			TrackController.execute(conn, in, ids);

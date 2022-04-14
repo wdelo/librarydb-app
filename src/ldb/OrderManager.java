@@ -21,13 +21,15 @@ public class OrderManager implements UserOption {
 	//Gives user option to choose to create or receive an order
 	@Override
 	public void execute(Connection conn, Scanner s) {
-    	System.out.print("Would you like to ORDER or RECEIVE items?");
+		OrderController.execute(conn, s);
+		
+    	/*System.out.print("Would you like to ORDER or RECEIVE items?");
     	char choice = Character.toLowerCase(s.nextLine().charAt(0));
     	if (choice == 'o') {
         	insertOrder(conn, s);
     	} else {
         	markItemArrived(conn, s);
-    	}
+    	}*/
 	}
 
 	// Performs an insertion for a new order, adding each item to a media instance and assigning a condition

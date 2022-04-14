@@ -88,6 +88,49 @@ public class MovieController {
 		for (int i = 0; i < actorIds.size(); i++)
 			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+actorIds.get(i)+"'", "'Actor'");
 		
+		ArrayList<String> directorIds = new ArrayList<String>();
+		
+		System.out.println("Are there any directors in this movie that are already in the database?\n1. Yes\n2. No");
+		userChoice = DBUtils.getValidInput(1, 2, in);
+		if (userChoice == 1) {
+			System.out.println("Let's find some.\n");
+			boolean done = false;
+			do {
+				System.out.println("What is the director's name?");
+				String directorName = in.nextLine();
+				String sql = "SELECT Name, Birthday, ContributorID FROM Contributor WHERE PrimaryRole = 'Director' AND Name = $value;";
+		        sql = sql.replace("$value", "'"+directorName+"'");
+				String[] directorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
+				if (directorId != null) {
+					directorIds.add(directorId[0]);
+				}
+				System.out.println("Are there any more directors in this movie that are already in the database?\n1. Yes\n2. No");
+				userChoice = DBUtils.getValidInput(1, 2, in);
+				if (userChoice == 2)
+					done = true;
+			} while (!done);
+		}
+		
+		System.out.println("Are there any directors in this movie that AREN'T already in the database?\n1. Yes\n2. No");
+		userChoice = DBUtils.getValidInput(1, 2, in);
+		if (userChoice == 1) {
+			System.out.println("Let's add some.\n");
+			boolean done = false;
+			do {
+				String directorId = DirectorController.insert(conn, in)[0];
+				if (directorId != null) {
+					directorIds.add(directorId);
+				}
+				System.out.println("Are there any more directors in this movie that AREN'T already in the database?\n1. Yes\n2. No");
+				userChoice = DBUtils.getValidInput(1, 2, in);
+				if (userChoice == 2)
+					done = true;
+			} while (!done);
+		}
+		
+		for (int i = 0; i < directorIds.size(); i++)
+			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+directorIds.get(i)+"'", "'Director'");
+		
 		DBUtils.insertRecord(conn, "Media", id, "'"+title+"'", "'"+genre+"'", "'"+year+"'");
 		DBUtils.insertRecord(conn, "Movie", id, "'"+cr+"'", ""+minutes);
 		
