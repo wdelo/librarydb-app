@@ -29,8 +29,8 @@ public class ArtistController {
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Contributor WHERE ContributorID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE ContributorID="+ids[0]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Contributor WHERE ContributorID="+"'"+ids[0]+"'");
+		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE ContributorID="+ids[0]+"'");
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
@@ -40,7 +40,7 @@ public class ArtistController {
         String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
         sql = sql.replace("$value", "'"+userInput+"'");
         
-        return new String[] {DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2)};
+        return DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 	}
 	
 	public static void execute(Connection conn, Scanner in) {

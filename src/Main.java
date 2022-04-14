@@ -1,4 +1,3 @@
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -17,7 +16,7 @@ import ldb.util.*;
 public class Main {
 	
 	// Name of the DB file
-	private static String DATABASE = "Media_DB4.db";
+	private static String DATABASE = "LibraryDB.db";
 	
 	public static void main (String[] args) 
 	{
@@ -130,8 +129,4 @@ public class Main {
 		
 		return new Menu(menuUserOptions, new MenuScreen(mainMenuPrompt, mainMenuScreenOptions)); 
 	}
-	
 }
-
-
-

@@ -57,9 +57,9 @@ public class MovieController {
 				String actorName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
 		        sql = sql.replace("$value", "'"+actorName+"'");
-				String actorId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] actorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (actorId != null) {
-					actorIds.add(actorId);
+					actorIds.add(actorId[0]);
 				}
 				System.out.println("Are there any more actors in this movie that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -74,7 +74,7 @@ public class MovieController {
 			System.out.println("Let's add some.\n");
 			boolean done = false;
 			do {
-				String actorId = insert(conn, in)[0];
+				String actorId = ActorController.insert(conn, in)[0];
 				if (actorId != null) {
 					actorIds.add(actorId);
 				}
@@ -123,7 +123,7 @@ public class MovieController {
 		String userInput = in.nextLine();
 		sql = sql.replace("$value", "'"+userInput+"'");
 		
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "MovieID", 5)};
+		return DBUtils.searchAndSelect(conn, in, sql, 5, "MovieID");
 	}
 
 	public static void execute(Connection conn, Scanner in) {

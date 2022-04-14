@@ -13,14 +13,14 @@ public class CheckoutController {
 		String lname = in.nextLine();
 		
 		String sql = "SELECT Email_Address, Fname, Lname FROM Patron WHERE Lname = '"+lname+"';";
-		String email = DBUtils.searchAndSelect(conn, in, sql, "Email_Address", 3);
+		String[] email = DBUtils.searchAndSelect(conn, in, sql, 3, "Email_Address");
 		
 		System.out.println("Let's find the piece of media this patron is checking out. Please enter its title:");
 		String title = in.nextLine();
 		
 		sql = "SELECT Call_Number, Title, Genre, Year FROM Media_Instance AS MI JOIN Media AS M ON MI.MediaID = M.MediaID "
 				+ "WHERE Title = '"+title+"' AND Availability = 1;";
-		String callNum = DBUtils.searchAndSelect(conn, in, sql, "Call_Number", 4);
+		String[] callNum = DBUtils.searchAndSelect(conn, in, sql, 4, "Call_Number");
 		
 		if (email != null && callNum != null) {
 			System.out.println("Let's get an initial checkout date.");
@@ -35,7 +35,7 @@ public class CheckoutController {
 				DBUtils.insertRecord(conn, "Checkout", "'"+callNum+"'", "'"+email+"'", date, "NULL");
 			}	
 			
-			return new String[] { callNum, email, date };
+			return new String[] { callNum[0], email[0], date };
 		} else {
 			System.out.println("Error inserting: nonexistant patron or media OR no available media");
 			
@@ -44,7 +44,7 @@ public class CheckoutController {
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Call_Number="+ids[0]+" AND Email_Address="+ids[1]+" AND Checkout_date="+ids[2]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Call_Number="+"'"+ids[0]+"'"+" AND Email_Address="+"'"+ids[1]+"'"+" AND Checkout_date="+"'"+ids[2]+"'");
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
@@ -79,7 +79,7 @@ public class CheckoutController {
 		default:
 			break;
 		}
-		return DBUtils.searchAndSelect3(conn, in, sql, "Call_Number", "Email_Address", "Checkout_date", 4);
+		return DBUtils.searchAndSelect(conn, in, sql, 4, "CallNumber", "PatronEmail", "CheckoutDate");
 	}
 
 	public static void execute(Connection conn, Scanner in) {

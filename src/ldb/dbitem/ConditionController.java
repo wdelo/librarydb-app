@@ -14,7 +14,7 @@ public class ConditionController {
 		
 		String sql = "SELECT Call_Number, Title, Genre, Year, Availability FROM Media_Instance AS MI JOIN Media AS M ON MI.MediaID = M.MediaID "
 				+ "WHERE Title = '"+title+"';";
-		String callNum = DBUtils.searchAndSelect(conn, in, sql, "Call_Number", 4);
+		String[] callNum = DBUtils.searchAndSelect(conn, in, sql, 4, "Call_Number");
 		
 		if (callNum != null) {
 			System.out.println("Let's get the date this condition is associated with.");
@@ -28,7 +28,7 @@ public class ConditionController {
 			System.out.println("What is the reason for the current condition of this piece of media?");
 			String reason = in.nextLine();
 			DBUtils.insertRecord(conn, "Condition", date, "'"+callNum+"'", "'"+condition+"'", ""+missing, "'"+reason+"'");
-			return new String[] {date, callNum};
+			return new String[] {date, callNum[0]};
 		} else {
 			System.out.println("Error inserting: nonexistant media OR no available media");
 			return null;
@@ -41,15 +41,15 @@ public class ConditionController {
 	}
 	
 	public static void delete(Connection conn, Scanner in, String[] ids) {	
-		DBUtils.deleteRecord(conn, "DELETE FROM Condition WHERE Date="+ids[0]+" AND Call_Number="+ids[1]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Condition WHERE Date="+"'"+ids[0]+"'"+" AND Call_Number="+"'"+ids[1]+"'");
 	}
 	
 	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
 		
 		String sql = "SELECT Title, C.Call_Number, Damage, Missing_Status, Date FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-				+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE C.CallNumber = "+parentIds[0];
+				+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE C.CallNumber = "+"'"+parentIds[0]+"'";
 
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "MovieID", 5)};
+		return DBUtils.searchAndSelect(conn, in, sql, 3, "Date", "Call_Number");
 	}
 
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {

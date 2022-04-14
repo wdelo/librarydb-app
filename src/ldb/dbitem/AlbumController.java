@@ -30,9 +30,9 @@ public class AlbumController {
 				String artistName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Artist' AND Name = $value;";
 			    sql = sql.replace("$value", "'"+artistName+"'");
-				String artistId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] artistId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (artistId != null) {
-					artistIds.add(artistId);
+					artistIds.add(artistId[0]);
 				}
 				System.out.println("Are there any more artists of this album that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -117,7 +117,7 @@ public class AlbumController {
 		userInput = in.nextLine();
 		sql = sql.replace("$value", "'"+userInput+"'");
 	
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3)};
+		return  DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
 
 	public static void execute(Connection conn, Scanner in) {

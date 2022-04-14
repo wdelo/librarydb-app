@@ -30,9 +30,9 @@ public class BookController {
 				String authorName = in.nextLine();
 				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
 			    sql = sql.replace("$value", "'"+authorName+"'");
-				String authorId = DBUtils.searchAndSelect(conn, in, sql, "ContributorID", 2);
+				String[] authorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (authorId != null) {
-					authorIds.add(authorId);
+					authorIds.add(authorId[0]);
 				}
 				System.out.println("Are there any more authors of this book that are already in the database?\n1. Yes\n2. No");
 				userChoice = DBUtils.getValidInput(1, 2, in);
@@ -89,12 +89,11 @@ public class BookController {
 	public static String[] retrieve(Connection conn, Scanner in) {
 		
         String userInput = "";
-        String sql = "";
-		sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
+        String sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
 		System.out.println("Please enter a book title to search for:");
 		userInput = in.nextLine();
 		sql = sql.replace("$value", "'"+userInput+"'");
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3)};
+		return DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
 
 	public static void execute(Connection conn, Scanner in) {

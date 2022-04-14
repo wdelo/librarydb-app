@@ -51,9 +51,9 @@ public class PatronController {
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Patron WHERE Email_Address="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Email_Address="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Email_Address="+ids[0]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Patron WHERE Email_Address="+"'"+ids[0]+"'");
+		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Email_Address="+"'"+ids[0]+"'");
+		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Email_Address="+"'"+ids[0]+"'");
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
@@ -65,7 +65,7 @@ public class PatronController {
 		sql = sql.replace("$attribute", "Email_Address");
 		sql = sql.replace("$value", "'"+userInput+"'");
 		
-		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "Email_Address", 6)};
+		return DBUtils.searchAndSelect(conn, in, sql, 6, "Email_Address");
 	}
 
 	public static void execute(Connection conn, Scanner in) {

@@ -13,13 +13,13 @@ public class ReviewController {
 		String lname = in.nextLine();
 		
 		String sql = "SELECT Email_Address, Fname, Lname FROM Patron WHERE Lname = '"+lname+"';";
-		String email = DBUtils.searchAndSelect(conn, in, sql, "Email_Address", 3);
+		String[] email = DBUtils.searchAndSelect(conn, in, sql, 3, "Email_Address");
 		
 		System.out.println("Let's find the piece of media this patron is reviewing. Please enter its title:");
 		String title = in.nextLine();
 		
 		sql = "SELECT Title, Genre, Year, MediaID FROM Media WHERE Title = '"+title+"';";
-		String id = DBUtils.searchAndSelect(conn, in, sql, "MediaID", 3);
+		String[] id = DBUtils.searchAndSelect(conn, in, sql, 3, "MediaID");
 		
 		if (email != null && id != null) {
 			System.out.println("Please enter the rating (1-10) the review gave:");
@@ -28,7 +28,7 @@ public class ReviewController {
 			String content = in.nextLine();
 			
 			DBUtils.insertRecord(conn, "Review", "'"+email+"'", "'"+id+"'", ""+rating, "'"+content+"'");
-			return new String[] { email, id };
+			return new String[] { email[0], id[0] };
 		} else {
 			System.out.println("Error inserting: nonexistant patron or media");
 			return null;
@@ -41,7 +41,7 @@ public class ReviewController {
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Patron_Email="+ids[0]+" AND MediaID="+ids[1]);	
+		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Patron_Email="+"'"+ids[0]+"'"+" AND MediaID="+"'"+ids[1]+"'");	
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
@@ -69,7 +69,7 @@ public class ReviewController {
 		default:
 			break;
 		}
-		return DBUtils.searchAndSelect2(conn, in, sql, "Patron_Email", "MediaID", 4);
+		return DBUtils.searchAndSelect(conn, in, sql, 4, "Patron_Email", "MediaID");
 	}
 
 	public static void execute(Connection conn, Scanner in, String[] parentIds) {
