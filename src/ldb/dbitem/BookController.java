@@ -48,11 +48,7 @@ public class BookController {
 			System.out.println("Let's find some.\n");
 			boolean done = false;
 			do {
-				System.out.println("What is the author's name?");
-				String authorName = in.nextLine();
-				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
-			    sql = sql.replace("$value", "'"+authorName+"'");
-				String[] authorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
+				String[] authorId = AuthorController.retrieve(conn, in);
 				if (authorId != null) {
 					authorIds.add(authorId[0]);
 				}
@@ -84,7 +80,7 @@ public class BookController {
 		DBUtils.insertRecord(conn, "Audio", id, "'b'");
 			
 		for (int i = 0; i < authorIds.size(); i++)
-			DBUtils.insertRecord(conn, "Contributes_To", id, "'"+authorIds.get(i)+"'", "'Author'");
+			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+authorIds.get(i)+"'", "'Author'");
 		
 		return new String[] {id};
 	}
@@ -101,19 +97,13 @@ public class BookController {
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Audio WHERE AudioID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Media_Instance WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE MediaID="+ids[0]);
+		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+"'"+ids[0]+"'");
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
-		
-        String userInput = "";
         String sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
 		System.out.println("Please enter a book title to search for:");
-		userInput = in.nextLine();
+		String userInput = in.nextLine();
 		sql = sql.replace("$value", "'"+userInput+"'");
 		return DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
