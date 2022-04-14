@@ -75,7 +75,7 @@ public class BookController {
 		System.out.println("Please enter the year of the book:");
 		String year = in.nextLine();
 		
-		DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
+		//DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {

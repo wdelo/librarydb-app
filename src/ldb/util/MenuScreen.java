@@ -30,6 +30,15 @@ public class MenuScreen {
 		}
 	}
 	
+	public void displayBlank()
+	{
+		DBUtils.blank();
+		System.out.println(prompt);
+		for (int i = 0; i < options.length; i++) {
+			System.out.println( (i+1) +". "+options[i]);
+		}
+	}
+	
 	public int getOption(Scanner in) {
 		return DBUtils.getValidInput(1, options.length, in);
 	}

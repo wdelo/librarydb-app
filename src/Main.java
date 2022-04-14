@@ -25,7 +25,8 @@ public class Main {
         
         Menu mainMenu = createMainMenu();
 
-        while (!mainMenu.isExited()) {
+        DBUtils.blank();
+        while (!mainMenu.isExited()) {        	
         	mainMenu.execute(conn, in);
         }
         System.out.println("Exiting...");

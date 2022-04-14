@@ -28,7 +28,7 @@ public class ActorController {
 		System.out.println("Let's get a date of birth.");
 		String dob = DBUtils.getFormattedDate(in);
 		
-		DBUtils.editRecord(conn, "Contributor", "'"+ids[0]+"'", "'"+name+"'", dob, "'Actor'");
+		//DBUtils.editRecord(conn, "Contributor", "'"+ids[0]+"'", "'"+name+"'", dob, "'Actor'");
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {

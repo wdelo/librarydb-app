@@ -47,7 +47,7 @@ public class PatronController {
 		System.out.println("Please enter a last name:");
 		String lname = in.nextLine();
 		
-		DBUtils.editRecord(conn, "Patron", "'"+ids[0]+"'", "'"+city+"'", "'"+state+"'", "'"+addr+"'", "'"+fname+"'", "'"+lname+"'");
+		//DBUtils.editRecord(conn, "Patron", "'"+ids[0]+"'", "'"+city+"'", "'"+state+"'", "'"+addr+"'", "'"+fname+"'", "'"+lname+"'");
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {

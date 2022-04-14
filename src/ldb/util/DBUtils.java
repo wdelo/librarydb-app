@@ -23,6 +23,11 @@ public class DBUtils
 	// Class cannot be instantiated
 	private DBUtils () {}
 	
+	public static void blank() {
+		for (int i = 0; i < 100; i++)
+			System.out.println();
+	}
+	
 	// Returns an array containing all the attributes (in order) of a particular table
 	// Note that a null value is returned if a table somehow has no attributes (columns)
 	public static String[] getAttributes(Connection conn, String table) {
@@ -201,19 +206,20 @@ public class DBUtils
 	}
 	
 	// edits a record
-	public static void editRecord(Connection conn, String table, String... values) {
-		try {			
-			String[] attributes = DBUtils.getAttributes(conn, table);
-			
-			
+	public static void editRecord(Connection conn, String table, int numConstraints, String... tablesAndValues) {
+		try {					
 			String sql = "UPDATE $tableName SET ";
 	        sql = sql.replace("$tableName", table);
-	        for (int i = 0; i < values.length; i++) {
-	        	sql = sql + attributes[i] + "=" + values[i] + ", ";
-	        }   
-	        sql = sql.substring(0, sql.lastIndexOf(',')); 
-	        sql = sql + " WHERE " + attributes[0] + "=" + values[0] + ";";
+	        for (int i = numConstraints*2; i < tablesAndValues.length; i+=2) {
+	        	sql = sql + tablesAndValues[i] + "=" + tablesAndValues[i+1] + ", ";
+	        }
+	        sql = sql.substring(0, sql.lastIndexOf(','));
+	        sql = sql + " WHERE " + tablesAndValues[0] + "=" + tablesAndValues[1] + ";";
 	        
+	        for (int i = 2; i < numConstraints*2; i++) {
+	        	sql = sql + " AND " + tablesAndValues[i] + "=" + tablesAndValues[i+1] + ";";
+	        }
+	                 
 	        PreparedStatement p = conn.prepareStatement(sql);
 	        p.executeUpdate();  	
 	       	p.close();
@@ -240,7 +246,7 @@ public class DBUtils
 		boolean tooLong = s.length() > length;
 		for (int i = 0; i < length; i++) {	
 			if (tooLong && i >= length - 3)
-				System.out.print("...");
+				System.out.print(".");
 			else if (i < s.length())
 				System.out.print(s.charAt(i));
 			else
@@ -254,6 +260,8 @@ public class DBUtils
 			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
 			rs.next();
+			
+			DBUtils.blank();
 			
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				if (i <= inclusionBoundary) {
@@ -277,6 +285,8 @@ public class DBUtils
 			ResultSet rs = p.executeQuery();	
 			ResultSetMetaData rsmd = rs.getMetaData();
 
+			DBUtils.blank();
+			
 			System.out.print("\t");
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				if (i <= inclusionBoundary) {
@@ -355,13 +365,17 @@ public class DBUtils
 	//
 	// Example call: valueIsDuplicate(conn, "[Order]", "Number_Ordered", "9");
 	// Example call: valueIsDuplicate(conn, "Movie", "MovieID", "'123456789'");
-	public static boolean valueExists(Connection conn, String table, String attributeName, String value) {
+	public static boolean valueExists(Connection conn, String table, String... attributesAndValues) {
 		boolean exists = false;
 		try {			
-			String sql = "SELECT COUNT(*) FROM $tableName WHERE $attributeName = $value";
+			String sql = "SELECT COUNT(*) FROM $tableName WHERE $attributeName = $value;";
 	        sql = sql.replace("$tableName", table);
-	        sql = sql.replace("$attributeName", attributeName);   
-	        sql = sql.replace("$value", value);
+	        sql = sql.replace("$attributeName", attributesAndValues[0]);   
+	        sql = sql.replace("$value", attributesAndValues[1]);
+	        
+	        for (int i = 2; i < attributesAndValues.length; i++) {
+	        	sql.replace(";", " AND "+attributesAndValues[i]+" = "+attributesAndValues+";");
+	        }
 	        
 	        PreparedStatement p = conn.prepareStatement(sql);       	
 	        ResultSet rs = p.executeQuery();

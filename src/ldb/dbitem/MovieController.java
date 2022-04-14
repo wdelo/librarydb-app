@@ -23,7 +23,7 @@ public class MovieController {
 	private static String[] selectedMenuScreenOptions = {
 			"Delete this movie",
 			"Edit this movie",
-			"View condition log",
+			"View condition logs",
 			"View reviews",
 			"View actors",
 			"View director(s)",
@@ -55,7 +55,7 @@ public class MovieController {
 			do {
 				System.out.println("What is the actor's name?");
 				String actorName = in.nextLine();
-				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
+				String sql = "SELECT Name, Birthday, ContributorID FROM Contributor WHERE PrimaryRole = 'Actor' AND Name = $value;";
 		        sql = sql.replace("$value", "'"+actorName+"'");
 				String[] actorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
 				if (actorId != null) {
@@ -86,7 +86,7 @@ public class MovieController {
 		}
 		
 		for (int i = 0; i < actorIds.size(); i++)
-			DBUtils.insertRecord(conn, "Contributes_To", id, "'"+actorIds.get(i)+"'", "'Actor'");
+			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+actorIds.get(i)+"'", "'Actor'");
 		
 		DBUtils.insertRecord(conn, "Media", id, "'"+title+"'", "'"+genre+"'", "'"+year+"'");
 		DBUtils.insertRecord(conn, "Movie", id, "'"+cr+"'", ""+minutes);
@@ -105,8 +105,8 @@ public class MovieController {
 		String cr = in.nextLine();		System.out.println("Please enter the length of the movie (whole number of minutes):");
 		int minutes = DBUtils.getValidInput(0, 999, in);
 		
-		DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
-		DBUtils.editRecord(conn, "Movie", ids[0], "'"+cr+"'", ""+minutes);
+		DBUtils.editRecord(conn, "Media", 1, "MediaID", ids[0], "Title", "'"+title+"'", "Genre", "'"+genre+"'", "Year", "'"+year+"'");
+		DBUtils.editRecord(conn, "Movie", 1, "MovieID", ids[0], "ContentRating", "'"+cr+"'", "Length", ""+minutes);
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
@@ -118,16 +118,23 @@ public class MovieController {
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
-        String sql = "SELECT Title, Genre, Year, Content_Rating, Length, MovieID FROM Movie JOIN Media ON MediaID = MovieID WHERE Title = $value;";
-		System.out.println("Please enter a movie title to search for:");
-		String userInput = in.nextLine();
-		sql = sql.replace("$value", "'"+userInput+"'");
+		System.out.println("Would you like to:\n1. View all movies\n2. Search for a movie");
+		int userChoice = DBUtils.getValidInput(1, 2, in);
 		
+		String sql = "SELECT Title, Genre, Year, ContentRating, Length, MovieID FROM Movie JOIN Media ON MediaID = MovieID;";
+		if (userChoice == 2) {
+			System.out.println("Please enter a movie title to search for:");
+			String userInput = in.nextLine();
+			sql = sql.replace(";", " WHERE Title = '"+userInput+"';");
+		}       
+		
+        DBUtils.blank();
+	
 		return DBUtils.searchAndSelect(conn, in, sql, 5, "MovieID");
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		menuScreen.display();
+		menuScreen.displayBlank();
 		int menuSelection = menuScreen.getOption(in);
 		switch (menuSelection) {
 		case 1:
@@ -142,35 +149,45 @@ public class MovieController {
 
 	public static void view(Connection conn, Scanner in) {
 		String[] ids = retrieve(conn, in);
-		selectedMenuScreen.display();
-		int menuSelection = selectedMenuScreen.getOption(in);
-		switch (menuSelection) {
-		case 1:
-			delete(conn, in, ids);
-			break;
-		case 2:
-			edit(conn, in, ids);
-			break;
-		case 3:
-			// condition log
-			// search and select movie instances
-			
-			// then execute condition using movie instances
-			ConditionController.execute(conn, in, ids); // change ids to movie instance ids
-			break;
-		case 4:
-			// reviews
-			// search and select review using selected movie id
-			// ReviewController.insert(conn, in, ids);
-			break;
-		case 5:
-			// actors
-			ActorController.execute(conn, in, ids);
-			break;
-		case 6:
-			// directors
-	
-			break;
+		if (ids != null) {
+			selectedMenuScreen.display();
+			int menuSelection = selectedMenuScreen.getOption(in);
+			switch (menuSelection) {
+			case 1:
+				delete(conn, in, ids);
+				break;
+			case 2:
+				edit(conn, in, ids);
+				break;
+			case 3:
+				String sql = "SELECT Title, CallNumber, [Digital/Physical], IsAvailable, Location FROM "
+						+ "Media AS M JOIN MediaInstance AS I ON M.MediaID = I.MediaID WHERE M.MediaID = '"+ids[0]+"'"
+								+ "AND [Digital/Physical] = 'p'";
+				System.out.println("Which specific copy of this movie would you like to manage the condition log for?");
+				String[] callNumber = DBUtils.searchAndSelect(conn, in, sql, 5, "CallNumber");
+				
+				if (callNumber != null)
+					ConditionController.execute(conn, in, callNumber);
+				else {
+					DBUtils.blank();
+					System.out.println("No condition logs for this movie :(\nType \"1\" to continue to the main menu.");
+					DBUtils.getValidInput(1, 1, in);
+				}
+				break;
+			case 4:
+				ReviewController.execute(conn, in, ids);
+				break;
+			case 5:
+				// actors
+				ActorController.execute(conn, in, ids);
+				break;
+			case 6:
+				// directors
+				DirectorController.execute(conn, in, ids);
+				break;
+			}
+		} else {
+			System.out.println("Couldn't find that movie :(");
 		}
 		
 	}
