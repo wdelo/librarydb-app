@@ -10,8 +10,8 @@ import ldb.util.MenuScreen;
 
 public class BookController {
 
-	private static String bookMenuPrompt = "What would you like to manage with audiobooks?";	
-	private static String[] bookMenuScreenOptions = {
+	private static String menuPrompt = "What would you like to manage with audiobooks?";	
+	private static String[] menuScreenOptions = {
     		"Add an audiobook", 
     		"Select an audiobook",
     		"Back",
@@ -28,7 +28,7 @@ public class BookController {
 			"Back",
 	};
 	
-	private static MenuScreen menuScreen = new MenuScreen(bookMenuPrompt, bookMenuScreenOptions);
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
 	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
 	
 	public static String[] insert(Connection conn, Scanner in) {
