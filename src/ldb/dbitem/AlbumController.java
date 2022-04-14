@@ -4,18 +4,12 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
 
-public class AlbumController implements DBItemController {
-
-	private ArtistController artistController;
+public class AlbumController {
 	
-	public AlbumController(ArtistController artist) {
-		artistController = artist;
-	}
-
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the title of the album:");
 		String title = in.nextLine();
 		System.out.println("Please enter the genre of the album:");
@@ -53,7 +47,7 @@ public class AlbumController implements DBItemController {
 			System.out.println("Let's add some.\n");
 			boolean done = false;
 			do {
-				String artistId = artistController.insert(conn, in)[0];
+				String artistId = ArtistController.insert(conn, in)[0];
 				if (artistId != null) {
 					artistIds.add(artistId);
 				}
@@ -92,8 +86,7 @@ public class AlbumController implements DBItemController {
 		return new String[] {id};
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
+	public static void edit(Connection conn, Scanner in, String[] ids) {
 		System.out.println("Please enter the title of the album:");
 		String title = in.nextLine();
 		System.out.println("Please enter the genre of the album:");
@@ -104,8 +97,7 @@ public class AlbumController implements DBItemController {
 		DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
 	}
 
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {
+	public static void delete(Connection conn, Scanner in, String[] ids) {
 		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+ids[0]);
 		DBUtils.deleteRecord(conn, "DELETE FROM Audio WHERE AudioID="+ids[0]);
 		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE MediaID="+ids[0]);
@@ -113,92 +105,29 @@ public class AlbumController implements DBItemController {
 		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE MediaID="+ids[0]);
 	}
 
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Title\n2. Genre\n3. Year\n4. Artist Name\n");
-        int userChoice = DBUtils.getValidInput(1, 4, in);
-		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Title = $value;";
-			System.out.println("Please enter an album title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 2:
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Genre = $value;";
-			System.out.println("Please enter an album genre to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 3:
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Year = $value;";
-			System.out.println("Please enter an album year to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 4:
-			sql = "SELECT Title, Genre, Year FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
-					+ "JOIN Contributes_To AS C ON C.MediaID = A.AudioID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID"
-					+ " WHERE A.[Album/Audiobook] = 'a' AND Con.Name = $value;";
-			System.out.println("Please enter an artist name to search for their albums:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		default:
-			break;
-		}
+	public static String[] retrieve(Connection conn, Scanner in) {
 
-	}
-
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Title\n2. Genre\n3. Year\n4. Artist Name\n");
-        int userChoice = DBUtils.getValidInput(1, 4, in);
-		
         String userInput = "";
         String sql = "";
         String id = "";
         
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Title = $value;";
-			System.out.println("Please enter an album title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 2:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Genre = $value;";
-			System.out.println("Please enter an album genre to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 3:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Year = $value;";
-			System.out.println("Please enter an album year to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 4:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
-					+ "JOIN Contributes_To AS C ON C.MediaID = A.AudioID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID"
-					+ " WHERE A.[Album/Audiobook] = 'a' AND Con.Name = $value;";
-			System.out.println("Please enter an artist name to search for their albums:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		default:
-			break;
-		}
+
+		sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'a' AND Title = $value;";
+		System.out.println("Please enter an album title to search for:");
+		userInput = in.nextLine();
+		sql = sql.replace("$value", "'"+userInput+"'");
+	
 		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "AudioID", 3)};
 	}
+
+	public static void execute(Connection conn, Scanner in) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void view(Connection conn, Scanner in) {
+		
+	}
+
 
 }

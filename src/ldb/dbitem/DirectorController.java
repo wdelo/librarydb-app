@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import ldb.UserOption;
 
-public class OrderController {
+public class DirectorController{
 
 	public static String[] insert(Connection conn, Scanner in) {
 		// TODO Auto-generated method stub
@@ -21,10 +21,14 @@ public class OrderController {
 		// TODO Auto-generated method stub
 
 	}
-
-	public static void search(Connection conn, Scanner in) {
+	
+	public static void execute(Connection conn, Scanner in) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public static void view(Connection conn, Scanner in) {
+		
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
@@ -32,14 +36,25 @@ public class OrderController {
 		return null;
 	}
 
-	public static void execute(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static void execute(Connection conn, Scanner in, String[] parentIds) {
+		// TODO Auto-generated method stub
+
+	}
+	
+	public static void view(Connection conn, Scanner in, String[] parentIds) {
 		
 	}
 	
-	public static void view(Connection conn, Scanner in) {
-		
-	}
 
 
 }

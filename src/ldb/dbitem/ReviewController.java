@@ -3,12 +3,12 @@ package ldb.dbitem;
 import java.sql.Connection;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
 
-public class ReviewController implements DBItemController {
+public class ReviewController {
 
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("Let's find the patron who is submitting this review. Please enter their last name:");
 		String lname = in.nextLine();
 		
@@ -35,49 +35,16 @@ public class ReviewController implements DBItemController {
 		}
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
+	public static void edit(Connection conn, Scanner in, String[] ids) {
 		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Patron_Email="+ids[0]+" AND MediaID="+ids[1]);
-	}
-
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Media Title\n2. Patron Email\n");
-        int userChoice = DBUtils.getValidInput(1, 2, in);
 		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Patron_Email, Rating, Review FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
-					+ "JOIN Patron AS P ON P.Email_Address = R.Patron_Email WHERE Title = $value;";
-			System.out.println("Please enter a media title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 2:
-			sql = "SELECT Title, Patron_Email, Rating, Review FROM Review AS R JOIN Media AS M ON R.MediaID = M.MediaID "
-					+ "JOIN Patron AS P ON P.Email_Address = R.Patron_Email WHERE R.Patron_Email = $value;";
-			System.out.println("Please enter a patron email to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;		
-		default:
-			break;
-		}
 	}
 
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
+	public static void delete(Connection conn, Scanner in, String[] ids) {
+		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Patron_Email="+ids[0]+" AND MediaID="+ids[1]);	
+	}
+
+	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("What would you like to search by?");
         System.out.println("1. Media Title\n2. Patron Email\n");
         int userChoice = DBUtils.getValidInput(1, 2, in);
@@ -103,6 +70,15 @@ public class ReviewController implements DBItemController {
 			break;
 		}
 		return DBUtils.searchAndSelect2(conn, in, sql, "Patron_Email", "MediaID", 4);
+	}
+
+	public static void execute(Connection conn, Scanner in, String[] parentIds) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void view(Connection conn, Scanner in, String[] parentIds) {
+		
 	}
 
 }

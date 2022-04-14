@@ -5,18 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
 
-public class TrackController implements DBItemController {
+public class TrackController {
 
-	private AlbumController albumController;
-	
-	public TrackController(AlbumController album) {
-		albumController = album;
-	}
-
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("Please enter the title of the track:");
 		String title = in.nextLine();
 		System.out.println("Please enter the length of the track (in seconds):");
@@ -69,8 +63,7 @@ public class TrackController implements DBItemController {
 		return new String[] {id, Integer.toString(trackNum)};
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
+	public static void edit(Connection conn, Scanner in, String[] ids) {
 		System.out.println("Please enter the title of the track:");
 		String title = in.nextLine();
 		System.out.println("Please enter the length of the track (in seconds):");
@@ -88,44 +81,11 @@ public class TrackController implements DBItemController {
 	    }
 	}
 
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {
+	public static void delete(Connection conn, Scanner in, String[] ids) {
 		DBUtils.deleteRecord(conn, "DELETE FROM Track WHERE AudioID="+ids[0]+" AND Track_Number="+ids[1]);
 	}
 
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Title\n2. Album Name\n");
-        int userChoice = DBUtils.getValidInput(1, 2, in);
-		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Track_Title, Length FROM Audio AS A JOIN Track AS T ON A.AudioID = T.AudioID "
-	        		+"WHERE [Album/Audiobook] = 'a' AND Track_Title = $value;";
-			System.out.println("Please enter a track title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 2:
-			sql = "SELECT Track_Title, Length FROM Audio AS A JOIN Track AS T ON A.AudioID = T.AudioID JOIN Media ON A.AudioID = MediaID "
-	        		+"WHERE [Album/Audiobook] = 'a' AND $attribute = $value;";
-			System.out.println("Please enter an album name to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$attribute", "Title");
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		default:
-			break;
-		}
-	}
-
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
+	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("What would you like to search by?");
         System.out.println("1. Title\n2. Album Name\n");
         int userChoice = DBUtils.getValidInput(1, 2, in);
@@ -154,5 +114,15 @@ public class TrackController implements DBItemController {
 		}
 		return DBUtils.searchAndSelect2(conn, in, sql, "AudioID", "Track_Number", 2);
 	}
+	
+	public static void execute(Connection conn, Scanner in, String[] parentIds) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void view(Connection conn, Scanner in, String[] parentIds) {
+		
+	}
+
 
 }

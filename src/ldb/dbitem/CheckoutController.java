@@ -3,12 +3,12 @@ package ldb.dbitem;
 import java.sql.Connection;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
 
-public class CheckoutController implements DBItemController {
+public class CheckoutController {
 
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Let's find the patron who is checking out. Please enter their last name:");
 		String lname = in.nextLine();
 		
@@ -41,59 +41,13 @@ public class CheckoutController implements DBItemController {
 			
 			return null;
 		}
-
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {
+	public static void delete(Connection conn, Scanner in, String[] ids) {
 		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Call_Number="+ids[0]+" AND Email_Address="+ids[1]+" AND Checkout_date="+ids[2]);
 	}
 
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Media Title\n2. Patron Email\n");
-        int userChoice = DBUtils.getValidInput(1, 2, in);
-		
-        String userInput = "";
-        String sql = "";
-        
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, C.Call_Number, C.Email_Address, Checkout_date, Return_Date "
-					+ "FROM Checkout AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number "
-					+ "JOIN Patron AS P ON P.Email_Address = C.Email_Address "
-					+ "JOIN Media AS Med ON M.MediaID = Med.MediaID "
-					+ "WHERE Title = $value;";
-			System.out.println("Please enter a media title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 2:
-			sql = "SELECT Title, C.Call_Number, C.Email_Address, Checkout_date, Return_Date "
-					+ "FROM Checkout AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number "
-					+ "JOIN Patron AS P ON P.Email_Address = C.Email_Address "
-					+ "JOIN Media AS Med ON M.MediaID = Med.MediaID "
-					+ "WHERE C.Email_Address = $value;";
-			System.out.println("Please enter a patron email to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;		
-		default:
-			break;
-		}
-	}
-
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
+	public static String[] retrieve(Connection conn, Scanner in) {
 		System.out.println("What would you like to search by?");
         System.out.println("1. Media Title\n2. Patron Email\n");
         int userChoice = DBUtils.getValidInput(1, 2, in);
@@ -127,5 +81,16 @@ public class CheckoutController implements DBItemController {
 		}
 		return DBUtils.searchAndSelect3(conn, in, sql, "Call_Number", "Email_Address", "Checkout_date", 4);
 	}
+
+	public static void execute(Connection conn, Scanner in) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void view(Connection conn, Scanner in) {
+		
+	}
+	
+	
 
 }

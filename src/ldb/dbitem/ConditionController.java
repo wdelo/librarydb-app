@@ -3,12 +3,12 @@ package ldb.dbitem;
 import java.sql.Connection;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
 
-public class ConditionController implements DBItemController {
+public class ConditionController {
 
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	public static String[] insert(Connection conn, Scanner in, String[] parentIds) {
 		System.out.println("Let's find the piece of media this condition will be applied to. Please enter its title:");
 		String title = in.nextLine();
 		
@@ -35,89 +35,50 @@ public class ConditionController implements DBItemController {
 		}
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
+	public static void edit(Connection conn, Scanner in, String[] ids) {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {	
+	
+	public static void delete(Connection conn, Scanner in, String[] ids) {	
 		DBUtils.deleteRecord(conn, "DELETE FROM Condition WHERE Date="+ids[0]+" AND Call_Number="+ids[1]);
 	}
-
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Media Title\n2. Damage\n3. Missing Status");
-        int userChoice = DBUtils.getValidInput(1, 3, in);
+	
+	public static String[] retrieve(Connection conn, Scanner in, String[] parentIds) {
 		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Title = $value;";
-			System.out.println("Please enter a media title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		case 2:
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Damage = $value;";
-			System.out.println("Please enter a damage condition (Good, Poor, etc.) to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;	
-		case 3: 
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Missing_Status = $value;";
-			System.out.println("Would you like to search for:\n1. Missing pieces of media\n2. Non-missing pieces of media");
-			int missing = DBUtils.getValidInput(1, 2, in);
-			sql = sql.replace("$value", "'"+Math.abs(missing-2)+"'");
-			DBUtils.retrieveRows(conn, sql);
-			break;
-		default:
-			break;
-		}
+		String sql = "SELECT Title, C.Call_Number, Damage, Missing_Status, Date FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
+				+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE C.CallNumber = "+parentIds[0];
+
+		return new String[] {DBUtils.searchAndSelect(conn, in, sql, "MovieID", 5)};
 	}
 
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Media Title\n2. Damage\n3. Missing Status");
-        int userChoice = DBUtils.getValidInput(1, 3, in);
-		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
+	public static void execute(Connection conn, Scanner in, String[] parentIds) {
+		//menuScreen.display();
+		int menuSelection = 0;//menuScreen.getOption(in);
+		switch (menuSelection) {
 		case 1:
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status, Date FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Title = $value;";
-			System.out.println("Please enter a media title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
+			insert(conn, in, parentIds);
 			break;
 		case 2:
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status, Date FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Damage = $value;";
-			System.out.println("Please enter a damage condition (Good, Poor, etc.) to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;	
-		case 3: 
-			sql = "SELECT Title, C.Call_Number, Damage, Missing_Status, Date FROM Condition AS C JOIN Media_Instance AS M ON C.Call_Number = M.Call_Number"
-					+ " JOIN Media AS Med ON M.MediaID = Med.MediaID WHERE Missing_Status = $value;";
-			System.out.println("Would you like to search for:\n1. Missing pieces of media\n2. Non-missing pieces of media");
-			int missing = DBUtils.getValidInput(1, 2, in);
-			sql = sql.replace("$value", "'"+Math.abs(missing-2)+"'");
-			break;
-		default:
+			view(conn, in, parentIds);
 			break;
 		}
-		return DBUtils.searchAndSelect2(conn, in, sql, "Date", "Call_Number", 3);
+		
+	}
+	
+	public static void view(Connection conn, Scanner in, String[] parentIds) {
+		String[] ids = retrieve(conn, in, parentIds);
+		//selectedMenuScreen.display();
+		int menuSelection = 0;//selectedMenuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		}
+		
 	}
 
 }

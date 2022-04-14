@@ -1,3 +1,4 @@
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -9,79 +10,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import ldb.*;
 import ldb.dbitem.*;
-import ldb.util.DBUtils;
+import ldb.util.*;
 
 public class Main {
 	
 	// Name of the DB file
 	private static String DATABASE = "Media_DB4.db";
 	
-	private static List<DBItemController> initializeDBItemControllers() {
-		List<DBItemController> dbItems = new ArrayList<>();
-		ActorController actor = new ActorController();
-		ArtistController artist = new ArtistController();
-		AuthorController author = new AuthorController();
-		AlbumController album = new AlbumController(artist);
-		
-		dbItems.add(new MovieController(actor));
-		dbItems.add(new AlbumController(artist));
-		dbItems.add(new TrackController(album));
-		dbItems.add(new BookController(author));
-		dbItems.add(actor);
-		dbItems.add(artist);
-		dbItems.add(author);
-		dbItems.add(new PatronController());
-		dbItems.add(new ReviewController());
-		dbItems.add(new CheckoutController());
-		dbItems.add(new ConditionController());
-		
-		return dbItems;
-	}
-	
-	
-	private static Map<Integer, UserOption> initializeOptionMap(List<DBItemController> dbItems) {
-		Map<Integer, UserOption> optionMap = new HashMap<>();
-		optionMap.put(1, new InsertionManager(dbItems));
-		optionMap.put(2, new ModifyManager(dbItems));
-		optionMap.put(3, new SearchManager(dbItems));
-		optionMap.put(4, new OrderManager());
-		optionMap.put(5, new ReportManager());
-		optionMap.put(6, null);
-		
-		return optionMap;
-	}
-	
 	public static void main (String[] args) 
 	{
         Connection conn = initializeDB(DATABASE);
-        Scanner s = new Scanner(System.in);   
-        List<DBItemController> dbItems = initializeDBItemControllers();
-        Map<Integer, UserOption> optionMap = initializeOptionMap(dbItems);
+        Scanner in = new Scanner(System.in);   
         
-        
-        int userChoice = 0;
-        
-        do {
-        	System.out.println("\nWhat would you like to do?");
-        	System.out.println("1. Add a new record");
-			System.out.println("2. Edit/Delete an existing record");
-			System.out.println("3. Search for a record");
-			System.out.println("4. Order an item");
-			System.out.println("5. View useful reports");
-			System.out.println("6. Exit program");
-			userChoice = DBUtils.getValidInput(1, 6, s);
-			
-			UserOption option = optionMap.get(userChoice);
-			
-			if (option != null) {
-				option.execute(conn, s);
-			} else {
-				System.out.println("Exiting program...");
-			}
-			
-        } while (userChoice != 6);
-        
+        Menu mainMenu = createMainMenu();
+
+        while (!mainMenu.isExited()) {
+        	mainMenu.execute(conn, in);
+        }
+        System.out.println("Exiting...");
         try {
         	conn.close();
         	System.out.println("Connection closed successfully.");
@@ -116,6 +64,72 @@ public class Main {
         return conn;
     }
 	
+	private static Menu createMainMenu() {		
+		UserOption[] mediaUserOptions = new UserOption[] { 
+				MovieController::execute, 
+				AlbumController::execute, 
+				BookController::execute,
+				null,
+		};
+		
+		UserOption[] contributorUserOptions = new UserOption[] { 
+				ActorController::execute, 
+				ArtistController::execute,
+				AuthorController::execute,
+				DirectorController::execute,
+				null,
+		};
+		
+		UserOption[] adminUserOptions = new UserOption[] {
+				PatronController::execute,
+				CheckoutController::execute,
+				null,
+		};
+		
+		String mainMenuPrompt = "What would you like to do?";	
+		String[] mainMenuScreenOptions = {
+	    		"Manage Media", 
+	    		"Manage Contributors", 
+	    		"Manage Library Cards",
+	    		"Manage Orders", 
+	    		"View reports", 
+	    		"Exit program",
+		};
+		
+		String manageMenuPrompt = "What would you like to manage?";
+		
+		String[] mediaMenuScreenOptions = {
+				"Manage movies",
+				"Manage albums",
+				"Manage tracks",
+				"Manage audiobooks",
+				"Back",
+		};
+		
+		String[] contributorMenuScreenOptions = {
+				"Manage actors",
+				"Manage artists",
+				"Manage authors",
+				"Manage directors",
+				"Back",
+		};
+		
+		String[] adminMenuScreenOptions = {
+				"Manage patrons",
+				"Manage checkouts",
+				"Back",
+		};
+		
+		UserOption[] menuUserOptions = new UserOption[] {
+				new Menu(mediaUserOptions, new MenuScreen(manageMenuPrompt, mediaMenuScreenOptions)),
+				new Menu(contributorUserOptions, new MenuScreen(manageMenuPrompt, contributorMenuScreenOptions)),
+				new Menu(adminUserOptions, new MenuScreen(manageMenuPrompt, adminMenuScreenOptions)),
+				new OrderManager(),
+				new ReportManager(),
+		};
+		
+		return new Menu(menuUserOptions, new MenuScreen(mainMenuPrompt, mainMenuScreenOptions)); 
+	}
 	
 }
 
