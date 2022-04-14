@@ -19,11 +19,19 @@ public class DirectorController{
 	private static String selectedMenuPrompt = "What would you like to do with this director?";
 	private static String[] selectedMenuScreenOptions = {
 			"Delete this director",
+			"Edit this director",
+			"Back",
+	};
+	
+	private static String selectedMenuPrompt2 = "What would you like to do with this director?";
+	private static String[] selectedMenuScreenOptions2 = {
+			"Delete this director",
 			"Back",
 	};
 	
 	private static MenuScreen menuScreen = new MenuScreen(directorMenuPrompt, directorMenuScreenOptions);
 	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	private static MenuScreen selectedMenuScreen2 = new MenuScreen(selectedMenuPrompt2, selectedMenuScreenOptions2);
 	
 	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the name of the director:");
@@ -144,8 +152,8 @@ public class DirectorController{
 	public static void view(Connection conn, Scanner in, String[] parentIds) {
 		String[] ids = retrieve(conn, in, parentIds);
 		if (ids != null) {
-			selectedMenuScreen.display();
-			int menuSelection = selectedMenuScreen.getOption(in);
+			selectedMenuScreen2.display();
+			int menuSelection = selectedMenuScreen2.getOption(in);
 			switch (menuSelection) {
 			case 1:
 				delete(conn, in, ids, parentIds);

@@ -118,7 +118,7 @@ public class PatronController {
 			edit(conn, in, ids);
 			break;
 		case 3:
-			CheckoutController.retrieveByPatron(conn, in, ids);
+			//CheckoutController.retrieveByPatron(conn, in, ids);
 			System.out.println("Type \"1\" to go back.");
 			DBUtils.getValidInput(1, 1, in);
 			break;
