@@ -5,16 +5,36 @@ import java.util.Scanner;
 
 import ldb.UserOption;
 import ldb.util.DBUtils;
+import ldb.util.MenuScreen;
 
 public class PatronController {
 
+	private static String menuPrompt = "What would you like to manage with patrons?";	
+	private static String[] menuScreenOptions = {
+    		"Add a patron", 
+    		"Select a patron",
+    		"Back",
+	};
+	
+	private static String selectedMenuPrompt = "What would you like to do with this patron?";
+	private static String[] selectedMenuScreenOptions = {
+			"Delete this patron",
+			"Edit this patron",
+			"View patron's checkouts",
+			"View patron's reviews",
+			"Back",
+	};
+	
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
+	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	
 	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter an email address:");
 		String email = "";
 		boolean emailIsUnique = false;
 		do {
 			email = in.nextLine();
-			emailIsUnique = !DBUtils.valueExists(conn, "Patron", "Email_Address", "'"+email+"'");
+			emailIsUnique = !DBUtils.valueExists(conn, "Patron", "Email", "'"+email+"'");
 			if (!emailIsUnique) {
 				System.out.println("That email is taken. Please enter a different one:");
 			}
@@ -47,35 +67,69 @@ public class PatronController {
 		System.out.println("Please enter a last name:");
 		String lname = in.nextLine();
 		
-		//DBUtils.editRecord(conn, "Patron", "'"+ids[0]+"'", "'"+city+"'", "'"+state+"'", "'"+addr+"'", "'"+fname+"'", "'"+lname+"'");
+		DBUtils.editRecord(conn, "Patron", 1, "Email", "'"+ids[0]+"'", "City", "'"+city+"'", "State", "'"+state+"'", "Address","'"+addr+"'","Fname","'"+fname+"'","Lname","'"+lname+"'");
 	}
 
 	public static void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Patron WHERE Email_Address="+"'"+ids[0]+"'");
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE Email_Address="+"'"+ids[0]+"'");
-		DBUtils.deleteRecord(conn, "DELETE FROM Review WHERE Email_Address="+"'"+ids[0]+"'");
+		DBUtils.deleteRecord(conn, "DELETE FROM Patron WHERE Email="+"'"+ids[0]+"'");
 	}
 
 	public static String[] retrieve(Connection conn, Scanner in) {
         String userInput = "";
-        String sql = "SELECT Email_Address, City, State, Street_Addr, Fname, Lname FROM Patron WHERE $attribute = $value;";
+        String sql = "SELECT Email, City, State, Address, Fname, Lname FROM Patron WHERE Email = $value;";
 	
 		System.out.println("Please enter an email address to search for:");
 		userInput = in.nextLine();
-		sql = sql.replace("$attribute", "Email_Address");
 		sql = sql.replace("$value", "'"+userInput+"'");
 		
-		return DBUtils.searchAndSelect(conn, in, sql, 6, "Email_Address");
+		return DBUtils.searchAndSelect(conn, in, sql, 6, "Email");
 	}
 
 	public static void execute(Connection conn, Scanner in) {
-		// TODO Auto-generated method stub
+		menuScreen.display();
+		int menuSelection = menuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			insert(conn, in);
+			break;
+		case 2:
+			view(conn, in);
+			break;
+		case 3:
+			break;
+		}
 		
 	}
 	
 	public static void view(Connection conn, Scanner in) {
+		String[] ids = retrieve(conn, in);
+		if (ids == null) {
+			System.out.println("Looks like we couldn't find that patron.");
+			return;
+		}
+		selectedMenuScreen.display();
+		int menuSelection = selectedMenuScreen.getOption(in);
 		
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		case 3:
+			CheckoutController.retrieveByPatron(conn, in, ids);
+			System.out.println("Type \"1\" to go back.");
+			DBUtils.getValidInput(1, 1, in);
+			break;
+		case 4:
+			ReviewController.retrieveByPatron(conn, in, ids);
+			System.out.println("Type \"1\" to go back.");
+			DBUtils.getValidInput(1, 1, in);
+			break;
+		case 5:
+			break;
+		} 
 	}
-
-
+	
 }
