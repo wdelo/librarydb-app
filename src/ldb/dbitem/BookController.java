@@ -4,18 +4,34 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import ldb.UserOption;
 import ldb.util.DBUtils;
+import ldb.util.MenuScreen;
 
-public class BookController implements DBItemController {
+public class BookController {
 
-	private AuthorController authorController;
+	private static String menuPrompt = "What would you like to manage with audiobooks?";	
+	private static String[] menuScreenOptions = {
+    		"Add an audiobook", 
+    		"Select an audiobook",
+    		"Back",
+	};
 	
-	public BookController(AuthorController author) {
-		authorController = author;
-	}
-
-	@Override
-	public String[] insert(Connection conn, Scanner in) {
+	private static String selectedMenuPrompt = "What would you like to do with this audiobook?";
+	private static String[] selectedMenuScreenOptions = {
+			"Delete this audiobook",
+			"Edit this audiobook",
+			"View condition log",
+			"View reviews",
+			"View authors",
+			"View chapters",
+			"Back",
+	};
+	
+	private static MenuScreen menuScreen = new MenuScreen(menuPrompt, menuScreenOptions);
+	private static MenuScreen selectedMenuScreen = new MenuScreen(selectedMenuPrompt, selectedMenuScreenOptions);
+	
+	public static String[] insert(Connection conn, Scanner in) {
 		System.out.println("Please enter the title of the book:");
 		String title = in.nextLine();
 		System.out.println("Please enter the genre of the book:");
@@ -32,11 +48,7 @@ public class BookController implements DBItemController {
 			System.out.println("Let's find some.\n");
 			boolean done = false;
 			do {
-				System.out.println("What is the author's name?");
-				String authorName = in.nextLine();
-				String sql = "SELECT Name, DOB, ContributorID FROM Contributor WHERE PrimaryRole = 'Author' AND Name = $value;";
-			    sql = sql.replace("$value", "'"+authorName+"'");
-				String[] authorId = DBUtils.searchAndSelect(conn, in, sql, 2, "ContributorID");
+				String[] authorId = AuthorController.retrieve(conn, in);
 				if (authorId != null) {
 					authorIds.add(authorId[0]);
 				}
@@ -53,7 +65,7 @@ public class BookController implements DBItemController {
 			System.out.println("Let's add some.\n");
 			boolean done = false;
 			do {
-				String authorId = authorController.insert(conn, in)[0];
+				String authorId = AuthorController.insert(conn, in)[0];
 				if (authorId != null) {
 					authorIds.add(authorId);
 				}
@@ -68,13 +80,12 @@ public class BookController implements DBItemController {
 		DBUtils.insertRecord(conn, "Audio", id, "'b'");
 			
 		for (int i = 0; i < authorIds.size(); i++)
-			DBUtils.insertRecord(conn, "Contributes_To", id, "'"+authorIds.get(i)+"'", "'Author'");
+			DBUtils.insertRecord(conn, "ContributesTo", id, "'"+authorIds.get(i)+"'", "'Author'");
 		
 		return new String[] {id};
 	}
 
-	@Override
-	public void edit(Connection conn, Scanner in, String[] ids) {
+	public static void edit(Connection conn, Scanner in, String[] ids) {
 		System.out.println("Please enter the title of the book:");
 		String title = in.nextLine();
 		System.out.println("Please enter the genre of the book:");
@@ -82,101 +93,74 @@ public class BookController implements DBItemController {
 		System.out.println("Please enter the year of the book:");
 		String year = in.nextLine();
 		
-		DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
+		//DBUtils.editRecord(conn, "Media", ids[0], "'"+title+"'", "'"+genre+"'", "'"+year+"'");
 	}
 
-	@Override
-	public void delete(Connection conn, Scanner in, String[] ids) {
-		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Audio WHERE AudioID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Contributes_To WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Media_Instance WHERE MediaID="+ids[0]);
-		DBUtils.deleteRecord(conn, "DELETE FROM Checkout WHERE MediaID="+ids[0]);
+	public static void delete(Connection conn, Scanner in, String[] ids) {
+		DBUtils.deleteRecord(conn, "DELETE FROM Media WHERE MediaID="+"'"+ids[0]+"'");
 	}
 
-	@Override
-	public void search(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Title\n2. Genre\n3. Year\n4. Author Name\n");
-        int userChoice = DBUtils.getValidInput(1, 4, in);
-		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
-			System.out.println("Please enter a book title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.printRows(conn, sql, 99);
-			break;
-		case 2:	
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Genre = $value;";
-			System.out.println("Please enter a book genre to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.printRows(conn, sql, 99);
-			break;
-		case 3:
-			sql = "SELECT Title, Genre, Year FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Year = $value;";
-			System.out.println("Please enter a book year to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.printRows(conn, sql, 99);
-			break;
-		case 4:
-			sql = "SELECT Title, Genre, Year FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
-					+ "JOIN Contributes_To AS C ON C.MediaID = A.AudioID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID "
-					+ "WHERE [Album/Audiobook] = 'b' AND Con.Name = $value;";
-			System.out.println("Please enter an author name to search for their books:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			DBUtils.printRows(conn, sql, 99);
-			break;
-		default:
-			break;
-		}
-	}
-
-	@Override
-	public String[] retrieve(Connection conn, Scanner in) {
-		System.out.println("What would you like to search by?");
-        System.out.println("1. Title\n2. Genre\n3. Year\n4. Author Name\n");
-        int userChoice = DBUtils.getValidInput(1, 4, in);
-		
-        String userInput = "";
-        String sql = "";
-		switch (userChoice) {
-		case 1:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
-			System.out.println("Please enter a book title to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 2:	
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Genre = $value;";
-			System.out.println("Please enter a book genre to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 3:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Year = $value;";
-			System.out.println("Please enter a book year to search for:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		case 4:
-			sql = "SELECT Title, Genre, Year, AudioID FROM Audio AS A JOIN Media AS M ON M.MediaID = A.AudioID "
-					+ "JOIN Contributes_To AS C ON C.MediaID = A.AudioID JOIN Contributor AS Con ON C.ContributorID = Con.ContributorID "
-					+ "WHERE [Album/Audiobook] = 'b' AND Con.Name = $value;";
-			System.out.println("Please enter an author name to search for their books:");
-			userInput = in.nextLine();
-			sql = sql.replace("$value", "'"+userInput+"'");
-			break;
-		default:
-			break;
-		}
+	public static String[] retrieve(Connection conn, Scanner in) {
+        String sql = "SELECT Title, Genre, Year, AudioID FROM Audio JOIN Media ON MediaID = AudioID WHERE [Album/Audiobook] = 'b' AND Title = $value;";
+		System.out.println("Please enter a book title to search for:");
+		String userInput = in.nextLine();
+		sql = sql.replace("$value", "'"+userInput+"'");
 		return DBUtils.searchAndSelect(conn, in, sql, 3, "AudioID");
 	}
+
+	public static void execute(Connection conn, Scanner in) {
+		menuScreen.display();
+		int menuSelection = menuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			insert(conn, in);
+			break;
+		case 2:
+			view(conn, in);
+			break;
+		case 3:
+			break;
+		}
+	}
+	
+	public static void view(Connection conn, Scanner in) {
+		String[] ids = retrieve(conn, in);
+		if (ids == null) {
+			System.out.println("Something went wrong retrieving that audiobook.");
+			return;
+		}
+		selectedMenuScreen.display();
+		int menuSelection = selectedMenuScreen.getOption(in);
+		switch (menuSelection) {
+		case 1:
+			delete(conn, in, ids);
+			break;
+		case 2:
+			edit(conn, in, ids);
+			break;
+		case 3:
+			// condition log
+			// search and select audiobook instances
+			String sql = "SELECT Title, CallNumber, [Digital/Physical], IsAvailable, Location FROM "
+							+ "Media AS M JOIN MediaInstance AS I ON M.MediaID = I.MediaID WHERE M.MediaID = '"+ids[0]+"'"
+							+ "AND [Digital/Physical] = 'p'";
+			String[] instanceId = DBUtils.searchAndSelect(conn, in, sql, 5, "CallNumber");
+			// then execute condition using movie instances
+			ConditionController.execute(conn, in, instanceId); // change ids to movie instance ids
+			break;
+		case 4:
+			ReviewController.execute(conn, in, ids);
+			break;
+		case 5:
+			AuthorController.execute(conn, in, ids);
+			break;
+		case 6:
+			TrackController.execute(conn, in, ids);
+			break;
+		case 7:
+			break;
+		}
+	}
+
 
 }

@@ -1,3 +1,4 @@
+package ldb;
 
 
 import java.sql.PreparedStatement;
@@ -16,17 +17,7 @@ import java.util.*;
 public class ReportManager implements UserOption {
     
 	// Constructor
-	public ReportManager() {}
-	
-	/**
-	 *  The database file name.
-	 *  
-	 *  Make sure the database file is in the root folder of the project if you only provide the name and extension.
-	 *  
-	 *  Otherwise, you will need to provide an absolute path from your C: drive or a relative path from the folder this class is in.
-	 */
-	private static String DATABASE = "Media_DB.db";
-	
+	public ReportManager() {}	
 	
 	/**
 	 *  The query statement to be executed.
@@ -34,29 +25,27 @@ public class ReportManager implements UserOption {
 	 *  Remember to include the semicolon at the end of the statement string.
 	 *  (Not all programming languages and/or packages require the semicolon (e.g., Python's SQLite3 library))
 	 */
-	private static String sqlStatement = "SELECT Media.Title as Title" + 
-			"FROM Patron, Media, Movie, Checkout, Media_Instance" + 
-			"WHERE Patron.Email_Address = ?" + 
-			"AND Checkout.Email_Address = Patron.Email_Address" + 
-			"AND Checkout.Call_number = Media_Instance.Call_number" + 
-			"AND Media_Instance.MediaID = Media.MediaID;";
+	private static String sqlStatement = "SELECT Title, C.CallNumber, C.PatronEmail, C.CheckoutDate, C.ReturnDate "
+			+ "FROM Checkout AS C, MediaInstance AS M, Patron AS P, Media AS Med "
+			+ "WHERE C.CallNumber = M.CallNumber AND P.Email = ? "
+			+ "AND P.Email = C.PatronEmail AND M.MediaID = Med.MediaID;";
 	
-	private static String sqlStatement2 = "SELECT Name, count(MI.Call_Number) AS Associated_Checkouts " + 
-			"From Media NATURAL JOIN Media_Instance AS MI NATURAL JOIN Checkout AS C NATURAL JOIN Contributes_To AS CT NATURAL JOIN Contributor " + 
-			"Where Role = 'Actor' " + 
+	private static String sqlStatement2 = "SELECT Name, count(MI.CallNumber) AS Associated_Checkouts " + 
+			"From Media NATURAL JOIN MediaInstance AS MI NATURAL JOIN Checkout AS C NATURAL JOIN ContributesTo AS CT NATURAL JOIN Contributor " + 
+			"Where PrimaryRole = 'Actor' " + 
 			"GROUP BY Name " + 
-			"Order BY count(MI.Call_Number) DESC " + 
+			"Order BY count(MI.CallNumber) DESC " + 
 			"LIMIT 1; ";
 	
 	private static String sqlStatement3 = "SELECT Name, SUM(Total_Listens) as Artist_Listens " + 
-			"FROM Contributor as C, Contributes_To as CT, " + 
+			"FROM Contributor as C, ContributesTo as CT, " + 
 			"(SELECT M.MediaID, SUM(Length) as Total_Listens " + 
-			"FROM Media as M, Audio as A, Track as T, Media_Instance as MI, Checkout as C " + 
-			"WHERE A.[Album/Audiobook] = true " + 
+			"FROM Media as M, Audio as A, Track as T, MediaInstance as MI, Checkout as C " + 
+			"WHERE A.[Album/Audiobook] = 'a' " + 
 			"AND T.AudioID = A.AudioID " + 
 			"AND M.MediaID = A.AudioID " + 
 			"AND M.MediaID = MI.MediaID " + 
-			"AND C.Call_Number = MI.Call_Number " + 
+			"AND C.CallNumber = MI.CallNumber " + 
 			"GROUP BY M.MediaID) as Album_Listens " + 
 			"WHERE C.ContributorID = CT.ContributorID " + 
 			"AND C.PrimaryRole='Artist' " + 
@@ -65,73 +54,41 @@ public class ReportManager implements UserOption {
 			"GROUP BY Name " + 
 			"ORDER BY Artist_Listens DESC " + 
 			"LIMIT 1;";
-	private static String sqlStatement4 = "SELECT Name, SUM(Total_Listens) as Author_Listens" + 
-			"FROM Contributor as C, Contributes_To as CT," + 
-			"(SELECT M.MediaID, SUM(Length) as Total_Listens" + 
-			"FROM Media as M, Audio as A, Track as T, Media_Instance as MI, Checkout as C" + 
-			"WHERE A.[Album/Audiobook] = false" + 
-			"AND T.AudioID = A.AudioID" + 
-			"AND M.MediaID = A.AudioID" + 
-			"AND M.MediaID = MI.MediaID" + 
-			"AND C.Call_Number = MI.Call_Number" + 
-			"GROUP BY M.MediaID) as Album_Listens" + 
-			"WHERE C.ContributorID = CT.ContributorID" + 
-			"AND C.PrimaryRole='Auther'" + 
-			"AND CT.ContributorID = C.ContributorID" + 
-			"AND CT.MediaID = Album_Listens.MediaID" + 
-			"GROUP BY Name" + 
-			"ORDER BY Author_Listens DESC" + 
+	
+	private static String sqlStatement4 = "SELECT Name, SUM(Total_Listens) as Author_Listens " + 
+			"FROM Contributor as C, ContributesTo as CT, " + 
+			"(SELECT M.MediaID, SUM(Length) as Total_Listens " + 
+			"FROM Media as M, Audio as A, Track as T, MediaInstance as MI, Checkout as C " + 
+			"WHERE A.[Album/Audiobook] = 'b' " + 
+			"AND T.AudioID = A.AudioID " + 
+			"AND M.MediaID = A.AudioID " + 
+			"AND M.MediaID = MI.MediaID " + 
+			"AND C.CallNumber = MI.CallNumber " + 
+			"GROUP BY M.MediaID) as Album_Listens " + 
+			"WHERE C.ContributorID = CT.ContributorID " + 
+			"AND C.PrimaryRole='Author' " + 
+			"AND CT.ContributorID = C.ContributorID " + 
+			"AND CT.MediaID = Album_Listens.MediaID " + 
+			"GROUP BY Name " + 
+			"ORDER BY Author_Listens DESC " + 
 			"LIMIT 1;";
 	
-	private static String sqlStatement5 = "SELECT Media.Title as MovieTitle, Checkout.Checkout_date" + 
-			"FROM Media, Movie, Checkout, Media_Instance" + 
-			"WHERE Checkout.Call_number = Media_Instance.Call_number" + 
-			"AND Media_Instance.MediaID = Media.MediaID" + 
-			"AND Media.MediaID = Movie.MovieID;";
+	private static String sqlStatement5 = "SELECT Email, Fname, Lname, COUNT(*) AS counts " + 
+			"FROM Movie AS M JOIN MediaInstance AS I ON MovieID = I.MediaID NATURAL JOIN " + 
+			"Checkout AS C JOIN Patron AS P ON Email = PatronEmail " + 
+			"GROUP BY P.Email " +
+			"ORDER BY counts DESC LIMIT 1;";
 	
-	private static String sqlStatement6 = "Select C.Name, M.Title, T.Track_Title" + 
-			"FROM Contributor as C, Contributes_To as CT, Media as M, Audio as A, Track as T" + 
-			"WHERE M.MediaID = CT.MediaID" + 
-			"AND C.ContributorID = CT.ContributorID" + 
-			"AND A.AudioID = M.MediaID" + 
-			"AND A.[Album/Audiobook] = true" + 
-			"AND T.AudioID = A.AudioID" + 
-			"AND C.Name = ?" + 
+	private static String sqlStatement6 = "Select C.Name, M.Title, T.TrackTitle " + 
+			"FROM Contributor as C, ContributesTo as CT, Media as M, Audio as A, Track as T " + 
+			"WHERE M.MediaID = CT.MediaID " + 
+			"AND C.ContributorID = CT.ContributorID " + 
+			"AND A.AudioID = M.MediaID " + 
+			"AND A.[Album/Audiobook] = 'a' " + 
+			"AND T.AudioID = A.AudioID " + 
+			"AND C.Name = ? " + 
 			"AND M.Year < ?;";
 	
-    /**
-     * Connects to the database if it exists, creates it if it does not, and returns the connection object.
-     * 
-     * @param databaseFileName the database file name
-     * @return a connection object to the designated database
-     */
-    public static Connection initializeDB(String databaseFileName) {
-    	/**
-    	 * The "Connection String" or "Connection URL".
-    	 * 
-    	 * "jdbc:sqlite:" is the "subprotocol".
-    	 * (If this were a SQL Server database it would be "jdbc:sqlserver:".)
-    	 */
-        String url = "jdbc:sqlite:" + databaseFileName;
-        Connection conn = null; // If you create this variable inside the Try block it will be out of scope
-        try {
-            conn = DriverManager.getConnection(url);
-            if (conn != null) {
-            	// Provides some positive assurance the connection and/or creation was successful.
-                DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("The connection to the database was successful.");
-            } else {
-            	// Provides some feedback in case the connection failed but did not throw an exception.
-            	System.out.println("Null Connection");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            System.out.println("There was a problem connecting to the database.");
-        }
-        return conn;
-    }
-    
 
     public static void sqlQueryBasicSelect(Connection conn, String sql){
         try {
@@ -258,6 +215,7 @@ public class ReportManager implements UserOption {
 				System.out.print("Enter Number Selection: ");
 			}
 		}
+		s.nextLine();
     }
 }
 
