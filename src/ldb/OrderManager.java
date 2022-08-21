@@ -1,3 +1,4 @@
+package ldb;
 
 
 import java.sql.Connection;
@@ -8,26 +9,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-//Utility class - handles orders within the database
-public class OrderManager {
+import ldb.dbitem.OrderController;
+import ldb.util.DBUtils;
 
-	// Class cannot be instantiated
-	private OrderManager() {
-	}
+//Utility class - handles orders within the database
+public class OrderManager implements UserOption {
+
+	// Constructor
+	public OrderManager() {}
 
 	//Gives user option to choose to create or receive an order
-	public static void createOrReceiveOrder(Connection conn, Scanner s) {
-    	System.out.print("Would you like to ORDER or RECEIVE items?");
+	@Override
+	public void execute(Connection conn, Scanner s) {
+		OrderController.execute(conn, s);
+		
+    	/*System.out.print("Would you like to ORDER or RECEIVE items?");
     	char choice = Character.toLowerCase(s.nextLine().charAt(0));
     	if (choice == 'o') {
         	insertOrder(conn, s);
     	} else {
         	markItemArrived(conn, s);
-    	}
+    	}*/
 	}
 
 	// Performs an insertion for a new order, adding each item to a media instance and assigning a condition
-	private static void insertOrder(Connection conn, Scanner s) {
+	private void insertOrder(Connection conn, Scanner s) {
     	String orderID = DBUtils.getUniqueID(conn, "[Order]", "Order_Id", 9);
     	boolean arrivalStatus = false;
     	System.out.println("Please enter the price of the order:");
@@ -45,13 +51,13 @@ public class OrderManager {
     	System.out.println("Is the order for an existing media item? Y/N");
     	char choice = Character.toLowerCase(s.nextLine().charAt(0));
     	if (choice == 'n') {
-        	InsertionManager.userInsert(conn, s);
+        	execute(conn, s);
     	}
     	System.out.println("What is the media title?");
     	String title = s.nextLine();
     	System.out.println("Please select the corresponding media.");
     	String MediaID = DBUtils.searchAndSelect(conn, s,
-            	"SELECT * FROM Media WHERE Title = " + "'"+title+"'", "MediaID", 100);
+            	"SELECT * FROM Media WHERE Title = " + "'"+title+"'", 99, "MediaID")[0];
     	if (MediaID != null) {
     	DBUtils.insertRecord(conn, "[Order]", "'" + orderID + "'",
             	"'" + arrivalStatus + "'", "'" + price + "'",

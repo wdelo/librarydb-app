@@ -1,57 +1,34 @@
-
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+
+import ldb.*;
+import ldb.dbitem.*;
+import ldb.util.*;
 
 public class Main {
 	
 	// Name of the DB file
-	private static String DATABASE = "Media_DB4.db";
+	private static String DATABASE = "LibraryDB.db";
 	
 	public static void main (String[] args) 
 	{
         Connection conn = initializeDB(DATABASE);
-        Scanner s = new Scanner(System.in);
-        int userChoice = 0;
+        Scanner in = new Scanner(System.in);   
         
-        do {
-        	System.out.println("\nWhat would you like to do?");
-        	System.out.println("1. Add a new record");
-			System.out.println("2. Edit/Delete an existing record");
-			System.out.println("3. Search for a record");
-			System.out.println("4. Order an item");
-			System.out.println("5. View useful reports");
-			System.out.println("6. Exit program");
-			userChoice = DBUtils.getValidInput(1, 6, s);
-			
-			switch (userChoice) {
-			case 1:
-				InsertionManager.userInsert(conn, s);
-				break;
-			case 2:
-				ModifyManager.userModify(conn, s);
-				break;
-			case 3:
-				SearchManager.userSearch(conn, s);
-				break;
-			case 4:
-				OrderManager.createOrReceiveOrder(conn, s);
-				break;
-			case 5:
-				PopularQueries.menu(conn, s);
-				break;
-			case 6:
-				System.out.println("Exiting program...");
-				break;
-			default:
-				break;
-			}
-        } while (userChoice != 6);
+        Menu mainMenu = createMainMenu();
         
+        while (!mainMenu.isExited()) {        	
+        	mainMenu.execute(conn, in);
+        }
+        System.out.println("Exiting...");
         try {
         	conn.close();
         	System.out.println("Connection closed successfully.");
@@ -85,7 +62,71 @@ public class Main {
         
         return conn;
     }
+	
+	private static Menu createMainMenu() {		
+		UserOption[] mediaUserOptions = new UserOption[] { 
+				MovieController::execute, 
+				AlbumController::execute, 
+				BookController::execute,
+				null,
+		};
+		
+		UserOption[] contributorUserOptions = new UserOption[] { 
+				ActorController::execute, 
+				ArtistController::execute,
+				AuthorController::execute,
+				DirectorController::execute,
+				null,
+		};
+		
+		UserOption[] adminUserOptions = new UserOption[] {
+				PatronController::execute,
+				CheckoutController::execute,
+				null,
+		};
+		
+		String mainMenuPrompt = "What would you like to do?";	
+		String[] mainMenuScreenOptions = {
+	    		"Manage Media", 
+	    		"Manage Contributors", 
+	    		"Manage Library Cards",
+	    		"Manage Orders", 
+	    		"View reports", 
+	    		"Exit program",
+		};
+		
+		String manageMenuPrompt = "What would you like to manage?";
+		
+		String[] mediaMenuScreenOptions = {
+				"Manage movies",
+				"Manage albums",
+				"Manage audiobooks",
+				"Back",
+		};
+		
+		String[] contributorMenuScreenOptions = {
+				"Manage actors",
+				"Manage artists",
+				"Manage authors",
+				"Manage directors",
+				"Back",
+		};
+		
+		String[] adminMenuScreenOptions = {
+				"Manage patrons",
+				"Manage checkouts",
+				"Back",
+		};
+		
+		UserOption[] menuUserOptions = new UserOption[] {
+				new Menu(mediaUserOptions, new MenuScreen(manageMenuPrompt, mediaMenuScreenOptions)),
+				new Menu(contributorUserOptions, new MenuScreen(manageMenuPrompt, contributorMenuScreenOptions)),
+				new Menu(adminUserOptions, new MenuScreen(manageMenuPrompt, adminMenuScreenOptions)),
+				new OrderManager(),
+				new ReportManager(),
+				null,
+		};
+		
+		return new Menu(menuUserOptions, new MenuScreen(mainMenuPrompt, mainMenuScreenOptions)); 
+	}
 }
-
-
-
